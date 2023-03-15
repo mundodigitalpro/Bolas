@@ -8,6 +8,7 @@ import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
+import kotlin.math.sqrt
 
 class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, attrs), SurfaceHolder.Callback {
 
@@ -22,6 +23,22 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         holder.addCallback(this)
         paint.color = Color.WHITE
     }
+
+    override fun performClick(): Boolean {
+        super.performClick()
+        return true
+    }
+
+    fun moveTo(x: Float, y: Float) {
+        val dx = x - this.x
+        val dy = y - this.y
+        val distance = sqrt(dx * dx + dy * dy)
+        val speed = distance / 10 // ajustar este valor para cambiar la velocidad de la bola
+        xVelocity = dx / distance * speed
+        yVelocity = dy / distance * speed
+    }
+
+
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         thread = GameThread(holder)
