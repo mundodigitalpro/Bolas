@@ -11,7 +11,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        gameView = findViewById<MyGameView>(R.id.my_game_view)
+        gameView = findViewById(R.id.my_game_view)
         gameView.requestFocus()
 
         gameView.setOnTouchListener { view, event ->

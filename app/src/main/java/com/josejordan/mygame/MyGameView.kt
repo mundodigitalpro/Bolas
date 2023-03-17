@@ -13,9 +13,14 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     private var thread: GameThread? = null
     private val paint = Paint()
+    private val scorePaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 60f
+    }
     private lateinit var ball: Ball
     private var obstacles: MutableList<Obstacle> = mutableListOf()
     private val obstaclesLock = Any()
+    private var score = 0 // variable de puntuación
 
     init {
         holder.addCallback(this)
@@ -39,8 +44,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     override fun surfaceCreated(holder: SurfaceHolder) {
         if (width > 0 && height > 0) {
             ball = Ball(width.toFloat() / 2, height.toFloat() / 2, 50f, 10f, 10f)
-            obstacles = Obstacle.createRandomObstacles(5, 50f, width, height) as MutableList<Obstacle>
-
+            obstacles = Obstacle.createRandomObstacles(10, 20f, 50f, width, height) as MutableList<Obstacle>
             thread = GameThread(holder)
             thread?.start()
         }
@@ -68,6 +72,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         obstacles.forEach {
             it.draw(canvas!!)
         }
+        canvas?.drawText("Score: $score", 50f, 100f, scorePaint) // muestra la puntuación en la pantalla
     }
 
     private fun update() {
@@ -89,6 +94,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                 synchronized(obstaclesLock) {
                     obstaclesToRemove.add(obstacle)
                 }
+                score += 1 // aumentar la puntuación en 1 cuando la bola colisiona con un obstáculo
+
             }
         }
 
