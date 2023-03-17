@@ -4,20 +4,20 @@ import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
+import android.graphics.RectF
 import android.util.AttributeSet
-import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import kotlin.math.sqrt
+import kotlin.random.Random
 
 class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, attrs), SurfaceHolder.Callback {
 
     private var thread: GameThread? = null
     private val paint = Paint()
-    private var x = 200f
-    private var y = 200f
-    private var xVelocity = 10f
-    private var yVelocity = 10f
+    private lateinit var ball: Ball
+    private var obstacles: List<Obstacle> = emptyList()
+
 
     init {
         holder.addCallback(this)
@@ -30,20 +30,24 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     }
 
     fun moveTo(x: Float, y: Float) {
-        val dx = x - this.x
-        val dy = y - this.y
+        val dx = x - ball.x
+        val dy = y - ball.y
         val distance = sqrt(dx * dx + dy * dy)
         val speed = distance / 10 // ajustar este valor para cambiar la velocidad de la bola
-        xVelocity = dx / distance * speed
-        yVelocity = dy / distance * speed
+        ball.xVelocity = dx / distance * speed
+        ball.yVelocity = dy / distance * speed
     }
-
-
 
     override fun surfaceCreated(holder: SurfaceHolder) {
-        thread = GameThread(holder)
-        thread?.start()
+        if (width > 0 && height > 0) {
+            ball = Ball(width.toFloat() / 2, height.toFloat() / 2, 50f, 10f, 10f)
+            obstacles = Obstacle.createRandomObstacles(5, 50f, width, height)
+
+            thread = GameThread(holder)
+            thread?.start()
+        }
     }
+
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
     }
@@ -61,27 +65,35 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     override fun draw(canvas: Canvas?) {
         super.draw(canvas)
-        Log.d("MyGameView", "draw()")
         canvas?.drawColor(Color.BLACK)
-        canvas?.drawCircle(x, y, 50f, paint)
-        Log.d("MyGameView", "draw: x=$x y=$y")
-
+        canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
+        obstacles.forEach {
+            it.draw(canvas!!)
+        }
     }
 
     private fun update() {
-        Log.d("MyGameView", "update: x=$x y=$y")
-        x += xVelocity
-        y += yVelocity
+        ball.update()
 
         // Cambiar dirección si la bola llega a los bordes del lienzo
-        if (x - 50f < 0 || x + 50f > width) {
-            xVelocity = -xVelocity
+        if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
+            ball.xVelocity = -ball.xVelocity
         }
-        if (y - 50f < 0 || y + 50f > height) {
-            yVelocity = -yVelocity
+        if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
+            ball.yVelocity = -ball.yVelocity
         }
+
+        for (obstacle in obstacles) {
+            if (obstacle.collidesWith(ball)) {
+                ball.xVelocity = -ball.xVelocity
+                ball.yVelocity = -ball.yVelocity
+                break
+            }
+        }
+
         postInvalidate()
     }
+
 
     inner class GameThread(private val holder: SurfaceHolder) : Thread() {
         private var running = true
@@ -101,10 +113,10 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                     }
                 }
             }
+        }
 
-            fun stopThread() {
-                running = false
-            }
+        fun stopThread() {
+            running = false
         }
     }
 }
