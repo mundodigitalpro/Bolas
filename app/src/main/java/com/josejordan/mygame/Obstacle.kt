@@ -15,6 +15,11 @@ class Obstacle(
     val paint: Paint
 ) {
 
+    fun remove() {
+        x = -100f // Mover el obstáculo fuera del área visible
+        y = -100f
+    }
+
     val rectF: RectF
         get() = RectF(x - radius, y - radius, x + radius, y + radius)
 
