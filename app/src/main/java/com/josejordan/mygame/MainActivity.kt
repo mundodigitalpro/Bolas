@@ -17,14 +17,27 @@ class MainActivity : AppCompatActivity() {
         gameView.setOnTouchListener { view, event ->
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    gameView.moveTo(event.x, event.y)
+                    if (gameView.getGameState() == MyGameView.GameState.Waiting) {
+                        gameView.setGameState(MyGameView.GameState.Playing)
+                    } else if (gameView.getGameState() == MyGameView.GameState.Playing) {
+                        gameView.moveTo(event.x, event.y)
+                    } else if (gameView.getGameState() == MyGameView.GameState.GameOver) {
+                        if (gameView.isGameOverTouched()) {
+                            gameView.resetGame()
+                        } else {
+                            gameView.setGameOverTouched(true)
+                        }
+                    }
                 }
+
                 MotionEvent.ACTION_UP -> {
                     view.performClick()
                 }
             }
             true
         }
+
+
     }
 }
 

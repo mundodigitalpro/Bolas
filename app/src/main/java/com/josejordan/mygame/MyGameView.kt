@@ -1,9 +1,7 @@
 package com.josejordan.mygame
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.provider.SyncStateContract.Helpers.update
 import android.util.AttributeSet
 import android.view.SurfaceHolder
@@ -15,21 +13,32 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     private var thread: GameThread? = null
     private val paint = Paint()
-    private val scorePaint = Paint().apply {
-        color = Color.WHITE
-        textSize = 60f
-    }
     private lateinit var ball: Ball
+    private lateinit var enemy: Enemy
+
     private var obstacles: MutableList<Obstacle> = mutableListOf()
     private val obstaclesLock = Any()
     private val scoreLock = Any()
     private var score = 0 // variable de puntuación
     private var currentLevel = 0 // nivel actual
+    private var gameOverTouched = false
 
     private val levels = listOf(
-        Level(10f, 10, 10),  // nivel 1 con velocidad de bola 10, 10 obstáculos y umbral de puntuación de 10
-        Level(15f, 15, 20),  // nivel 2 con velocidad de bola 15, 15 obstáculos y umbral de puntuación de 20
-        Level(20f, 20, 30),  // nivel 3 con velocidad de bola 20, 20 obstáculos y umbral de puntuación de 30
+        Level(
+            10f,
+            10,
+            10
+        ),  // nivel 1 con velocidad de bola 10, 10 obstáculos y umbral de puntuación de 10
+        Level(
+            15f,
+            15,
+            20
+        ),  // nivel 2 con velocidad de bola 15, 15 obstáculos y umbral de puntuación de 20
+        Level(
+            20f,
+            20,
+            30
+        ),  // nivel 3 con velocidad de bola 20, 20 obstáculos y umbral de puntuación de 30
 /*        Level(25f, 25, 40),  // nivel 4 con velocidad de bola 25, 25 obstáculos y umbral de puntuación de 40
         Level(30f, 30, 50),  // nivel 5 con velocidad de bola 30, 30 obstáculos y umbral de puntuación de 50
         Level(35f, 35, 60),  // nivel 6 con velocidad de bola 35, 35 obstáculos y umbral de puntuación de 60
@@ -39,9 +48,39 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         Level(55f, 55, 100)  // nivel 10 con velocidad de bola 55, 55 obstáculos y umbral de puntuación de 100*/
     )
     private var currentLevelIndex = 0 // nivel actual
-    //private var canAdvanceLevel = false // puede avanzar al siguiente nivel?
-    //private var scoreByLevel = mutableListOf<Int>() // puntuación por nivel
+
     private var gameOver = false
+
+    private var gameState: GameState = GameState.Waiting
+
+    enum class GameState {
+        Waiting,
+        Playing,
+        GameOver,
+        PlayAgain
+    }
+
+    private val playPaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 80f
+        typeface = Typeface.DEFAULT_BOLD
+        isAntiAlias = true
+    }
+
+    private val scorePaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 80f
+        typeface = Typeface.DEFAULT_BOLD
+        isAntiAlias = true
+    }
+
+    private val playAndGameOverPaint = Paint().apply {
+        color = Color.WHITE
+        textSize = 80f
+        typeface = Typeface.DEFAULT_BOLD
+        isAntiAlias = true
+    }
+
 
     init {
         holder.addCallback(this)
@@ -50,7 +89,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     companion object {
         private const val OBSTACLE_LIMIT =
-           10 // variable para limitar el número de obstáculos en pantalla
+            10 // variable para limitar el número de obstáculos en pantalla
     }
 
     override fun performClick(): Boolean {
@@ -67,13 +106,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         ball.yVelocity = dy / distance * speed
     }
 
-/*    private fun createObstaclesForLevel(level: Level): List<Obstacle> {
-        val ballSpeed = level.ballSpeed
-        val obstacleCount = level.obstacleCount
-        val speedMultiplier = currentLevelIndex + 1
-        val speed = ballSpeed * speedMultiplier
-        return Obstacle.createRandomObstacles(obstacleCount, speed, 50f, width, height, ballSpeed, ballSpeed)
-    }*/
 
     private fun createObstaclesForLevel(level: Level): List<Obstacle> {
         val ballSpeed = level.ballSpeed
@@ -83,14 +115,30 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
         // Nueva variable para mantener la puntuación de cada nivel
         val scoreByLevel = score
-        return Obstacle.createRandomObstacles(obstacleCount, speed, 50f, width, height, ballSpeed, ballSpeed)
+        return Obstacle.createRandomObstacles(
+            obstacleCount,
+            speed,
+            50f,
+            width,
+            height,
+            ballSpeed,
+            ballSpeed
+        )
             .onEach { it.scoreByLevel = scoreByLevel }
     }
+
 
     override fun surfaceCreated(holder: SurfaceHolder) {
         if (width > 0 && height > 0) {
             ball = Ball(width.toFloat() / 2, height.toFloat() / 2, 50f, 10f, 10f)
-            obstacles = createObstaclesForLevel(levels[currentLevel]) as MutableList<Obstacle>
+            enemy = Enemy(
+                (width / 4).toFloat(),
+                (height / 4).toFloat(),
+                100f,
+                100f,
+                5f,
+                5f
+            )
             thread = GameThread(holder)
             thread?.start()
         }
@@ -117,81 +165,162 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         canvas?.drawColor(Color.BLACK)
         canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
 
-        // copia de la lista de obstaculos actual
+        // Copia de la lista de obstáculos actual
         val currentObstacles: List<Obstacle>
         synchronized(obstaclesLock) {
             currentObstacles = ArrayList(obstacles)
         }
 
-        // dibujar cada obstaculo en la lista
+        // Dibujar cada obstáculo en la lista
         for (obstacle in currentObstacles) {
             obstacle.draw(canvas!!)
         }
 
-        canvas?.drawText("Score: $score", 50f, 100f, scorePaint)
-        canvas?.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
+        // Dibujar el enemigo
+        enemy.draw(canvas!!)
 
-        if (gameOver) {
-            val gameOverText = "Game Over"
-            val gameOverWidth = scorePaint.measureText(gameOverText)
-            canvas?.drawText(
-                gameOverText,
-                (width - gameOverWidth) / 2,
+        canvas.drawText("Score: $score", 50f, 100f, scorePaint)
+        canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
+
+        if (gameState == GameState.GameOver) {
+            val text = if (gameOverTouched) "PLAY AGAIN" else "Game Over"
+            val textWidth = playAndGameOverPaint.measureText(text)
+            canvas.drawText(
+                text,
+                (width - textWidth) / 2,
                 height / 2f,
-                scorePaint
+                playAndGameOverPaint
+            )
+        } else if (gameState == GameState.Waiting) {
+            val playText = "PLAY"
+            val playWidth = playAndGameOverPaint.measureText(playText)
+            canvas.drawText(
+                playText,
+                (width - playWidth) / 2,
+                height / 2f,
+                playAndGameOverPaint
+            )
+        } else if (gameState == GameState.PlayAgain) {
+            val playAgainText = "PLAY AGAIN"
+            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
+            canvas.drawText(
+                playAgainText,
+                (width - playAgainWidth) / 2,
+                height / 2f,
+                playAndGameOverPaint
             )
         }
     }
 
+
 /*    private fun update() {
-        ball.update()
+        if (gameState == GameState.Playing) {
+            ball.update()
 
-        if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
-            ball.xVelocity = -ball.xVelocity
-        }
-        if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
-            ball.yVelocity = -ball.yVelocity
-        }
-
-        val obstaclesToRemove = mutableListOf<Obstacle>()
-        var hasCollided = false // nueva variable para controlar si la bola ha colisionado con algún obstáculo
-
-        for (obstacle in obstacles) {
-            if (obstacle.collidesWith(ball)) {
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
                 ball.xVelocity = -ball.xVelocity
+            }
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
                 ball.yVelocity = -ball.yVelocity
-                obstaclesToRemove.add(obstacle)
-                score += 1
-                hasCollided = true
+            }
+
+            val obstaclesToRemove = mutableListOf<Obstacle>()
+            var hasCollided =
+                false // nueva variable para controlar si la bola ha colisionado con algún obstáculo
+
+            for (obstacle in obstacles) {
+                if (obstacle.collidesWith(ball)) {
+                    ball.xVelocity = -ball.xVelocity
+                    ball.yVelocity = -ball.yVelocity
+                    obstaclesToRemove.add(obstacle)
+                    score += 1
+                    hasCollided = true
+                }
+            }
+
+            synchronized(obstaclesLock) {
+                obstacles.removeAll(obstaclesToRemove)
+            }
+
+            // Generar nuevos obstáculos si ya no hay ninguno en la pantalla
+            if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
+                currentLevelIndex++
+                val currentLevel = levels[currentLevelIndex]
+                obstacles.addAll(createObstaclesForLevel(currentLevel))
+            } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
+                gameState = GameState.GameOver
+            }
+
+            // Mover los obstáculos
+            for (obstacle in obstacles) {
+                obstacle.x += obstacle.xVelocity
+                obstacle.y += obstacle.yVelocity
+
+                if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
+                    obstacle.xVelocity = -obstacle.xVelocity
+                }
+                if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
+                    obstacle.yVelocity = -obstacle.yVelocity
+                }
             }
         }
 
-        synchronized(obstaclesLock) {
-            obstacles.removeAll(obstaclesToRemove)
-        }
+        postInvalidate()
+    }*/
 
-        // Generar nuevos obstáculos si ya no hay ninguno en la pantalla
-        if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
-            currentLevelIndex++
-            val currentLevel = levels[currentLevelIndex]
-            obstacles.addAll(createObstaclesForLevel(currentLevel))
-            synchronized(scoreLock) {
-                score = 0
+/*    private fun update() {
+        if (gameState == GameState.Playing) {
+            ball.update()
+
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
+                ball.xVelocity = -ball.xVelocity
             }
-        } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
-            gameOver = true
-        }
-
-        // Mover los obstáculos
-        for (obstacle in obstacles) {
-            obstacle.x += obstacle.xVelocity
-            obstacle.y += obstacle.yVelocity
-
-            if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
-                obstacle.xVelocity = -obstacle.xVelocity
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
+                ball.yVelocity = -ball.yVelocity
             }
-            if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
-                obstacle.yVelocity = -obstacle.yVelocity
+
+            val obstaclesToRemove = mutableListOf<Obstacle>()
+            var hasCollided = false
+
+            for (obstacle in obstacles) {
+                if (obstacle.collidesWith(ball)) {
+                    ball.xVelocity = -ball.xVelocity
+                    ball.yVelocity = -ball.yVelocity
+                    obstaclesToRemove.add(obstacle)
+                    score += 1
+                    hasCollided = true
+                }
+            }
+
+            synchronized(obstaclesLock) {
+                obstacles.removeAll(obstaclesToRemove)
+            }
+
+            // Verificar si la bola colisiona con el enemigo
+            if (enemy.collidesWith(ball.x, ball.y, ball.radius)) {
+                ball.resetPosition()
+                gameOver = true
+                gameState = GameState.GameOver
+            }
+
+            if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
+                currentLevelIndex++
+                val currentLevel = levels[currentLevelIndex]
+                obstacles.addAll(createObstaclesForLevel(currentLevel))
+            } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
+                gameState = GameState.GameOver
+            }
+
+            for (obstacle in obstacles) {
+                obstacle.x += obstacle.xVelocity
+                obstacle.y += obstacle.yVelocity
+
+                if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
+                    obstacle.xVelocity = -obstacle.xVelocity
+                }
+                if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
+                    obstacle.yVelocity = -obstacle.yVelocity
+                }
             }
         }
 
@@ -199,56 +328,104 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     }*/
 
     private fun update() {
-        ball.update()
+        if (gameState == GameState.Playing) {
+            ball.update()
 
-        if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
-            ball.xVelocity = -ball.xVelocity
-        }
-        if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
-            ball.yVelocity = -ball.yVelocity
-        }
-
-        val obstaclesToRemove = mutableListOf<Obstacle>()
-        var hasCollided = false // nueva variable para controlar si la bola ha colisionado con algún obstáculo
-
-        for (obstacle in obstacles) {
-            if (obstacle.collidesWith(ball)) {
+            if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
                 ball.xVelocity = -ball.xVelocity
+            }
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
                 ball.yVelocity = -ball.yVelocity
-                obstaclesToRemove.add(obstacle)
-                score += 1
-                hasCollided = true
             }
-        }
 
-        synchronized(obstaclesLock) {
-            obstacles.removeAll(obstaclesToRemove)
-        }
+            val obstaclesToRemove = mutableListOf<Obstacle>()
+            var hasCollided = false
 
-        // Generar nuevos obstáculos si ya no hay ninguno en la pantalla
-        if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
-            currentLevelIndex++
-            val currentLevel = levels[currentLevelIndex]
-            obstacles.addAll(createObstaclesForLevel(currentLevel))
-        } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
-            gameOver = true
-        }
-
-        // Mover los obstáculos
-        for (obstacle in obstacles) {
-            obstacle.x += obstacle.xVelocity
-            obstacle.y += obstacle.yVelocity
-
-            if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
-                obstacle.xVelocity = -obstacle.xVelocity
+            for (obstacle in obstacles) {
+                if (obstacle.collidesWith(ball)) {
+                    ball.xVelocity = -ball.xVelocity
+                    ball.yVelocity = -ball.yVelocity
+                    obstaclesToRemove.add(obstacle)
+                    score += 1
+                    hasCollided = true
+                }
             }
-            if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
-                obstacle.yVelocity = -obstacle.yVelocity
+
+            synchronized(obstaclesLock) {
+                obstacles.removeAll(obstaclesToRemove)
+            }
+
+            // Verificar si la bola colisiona con el enemigo
+            if (enemy.collidesWith(ball.x, ball.y, ball.radius)) {
+                ball.resetPosition()
+                gameOver = true
+                gameState = GameState.GameOver
+            }
+
+            // Pasar al siguiente nivel si no hay obstáculos
+            if (obstacles.isEmpty()) {
+                if (currentLevelIndex < levels.lastIndex) {
+                    currentLevelIndex++
+                    val currentLevel = levels[currentLevelIndex]
+                    obstacles.addAll(createObstaclesForLevel(currentLevel))
+                } else {
+                    gameState = GameState.GameOver
+                }
+            }
+
+            for (obstacle in obstacles) {
+                obstacle.x += obstacle.xVelocity
+                obstacle.y += obstacle.yVelocity
+
+                if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
+                    obstacle.xVelocity = -obstacle.xVelocity
+                }
+                if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
+                    obstacle.yVelocity = -obstacle.yVelocity
+                }
+            }
+
+            // Actualizar la posición del enemigo
+            enemy.update()
+            if (enemy.x < 0 || enemy.x + enemy.width > width) {
+                enemy.xVelocity = -enemy.xVelocity
+            }
+            if (enemy.y < 0 || enemy.y + enemy.height > height) {
+                enemy.yVelocity = -enemy.yVelocity
             }
         }
 
         postInvalidate()
     }
+
+
+
+    // En MyGameView
+    fun getGameState(): GameState {
+        return gameState
+    }
+
+    fun setGameState(state: GameState) {
+        gameState = state
+    }
+
+    fun resetGame() {
+        ball.resetPosition()
+        currentLevelIndex = 0
+        score = 0
+        gameState = GameState.Waiting
+        obstacles.clear()
+        obstacles.addAll(createObstaclesForLevel(levels[currentLevelIndex]))
+    }
+
+    fun isGameOverTouched(): Boolean {
+        return gameOverTouched
+    }
+
+    fun setGameOverTouched(touched: Boolean) {
+        gameOverTouched = touched
+    }
+
 
 
 
