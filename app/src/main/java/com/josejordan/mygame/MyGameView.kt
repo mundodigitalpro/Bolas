@@ -25,25 +25,22 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private val scoreLock = Any()
     private var score = 0 // variable de puntuación
     private var currentLevel = 0 // nivel actual
+
     private val levels = listOf(
-        Level(
-            10f,
-            10,
-            10
-        ), // nivel 1 con velocidad de bola 10, 10 obstáculos y umbral de puntuación de 10
-        Level(
-            15f,
-            15,
-            20
-        ), // nivel 2 con velocidad de bola 15, 15 obstáculos y umbral de puntuación de 20
-        Level(
-            20f,
-            20,
-            30
-        )  // nivel 3 con velocidad de bola 20, 20 obstáculos y umbral de puntuación de 30
+        Level(10f, 10, 10),  // nivel 1 con velocidad de bola 10, 10 obstáculos y umbral de puntuación de 10
+        Level(15f, 15, 20),  // nivel 2 con velocidad de bola 15, 15 obstáculos y umbral de puntuación de 20
+        Level(20f, 20, 30),  // nivel 3 con velocidad de bola 20, 20 obstáculos y umbral de puntuación de 30
+/*        Level(25f, 25, 40),  // nivel 4 con velocidad de bola 25, 25 obstáculos y umbral de puntuación de 40
+        Level(30f, 30, 50),  // nivel 5 con velocidad de bola 30, 30 obstáculos y umbral de puntuación de 50
+        Level(35f, 35, 60),  // nivel 6 con velocidad de bola 35, 35 obstáculos y umbral de puntuación de 60
+        Level(40f, 40, 70),  // nivel 7 con velocidad de bola 40, 40 obstáculos y umbral de puntuación de 70
+        Level(45f, 45, 80),  // nivel 8 con velocidad de bola 45, 45 obstáculos y umbral de puntuación de 80
+        Level(50f, 50, 90),  // nivel 9 con velocidad de bola 50, 50 obstáculos y umbral de puntuación de 90
+        Level(55f, 55, 100)  // nivel 10 con velocidad de bola 55, 55 obstáculos y umbral de puntuación de 100*/
     )
     private var currentLevelIndex = 0 // nivel actual
-    private var canAdvanceLevel = false // puede avanzar al siguiente nivel?
+    //private var canAdvanceLevel = false // puede avanzar al siguiente nivel?
+    //private var scoreByLevel = mutableListOf<Int>() // puntuación por nivel
     private var gameOver = false
 
     init {
@@ -53,7 +50,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     companion object {
         private const val OBSTACLE_LIMIT =
-           5 // variable para limitar el número de obstáculos en pantalla
+           10 // variable para limitar el número de obstáculos en pantalla
     }
 
     override fun performClick(): Boolean {
@@ -70,12 +67,24 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         ball.yVelocity = dy / distance * speed
     }
 
-    private fun createObstaclesForLevel(level: Level): List<Obstacle> {
+/*    private fun createObstaclesForLevel(level: Level): List<Obstacle> {
         val ballSpeed = level.ballSpeed
         val obstacleCount = level.obstacleCount
         val speedMultiplier = currentLevelIndex + 1
         val speed = ballSpeed * speedMultiplier
         return Obstacle.createRandomObstacles(obstacleCount, speed, 50f, width, height, ballSpeed, ballSpeed)
+    }*/
+
+    private fun createObstaclesForLevel(level: Level): List<Obstacle> {
+        val ballSpeed = level.ballSpeed
+        val obstacleCount = level.obstacleCount
+        val speedMultiplier = currentLevelIndex + 1
+        val speed = ballSpeed * speedMultiplier
+
+        // Nueva variable para mantener la puntuación de cada nivel
+        val scoreByLevel = score
+        return Obstacle.createRandomObstacles(obstacleCount, speed, 50f, width, height, ballSpeed, ballSpeed)
+            .onEach { it.scoreByLevel = scoreByLevel }
     }
 
     override fun surfaceCreated(holder: SurfaceHolder) {
@@ -134,7 +143,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
     }
 
-    private fun update() {
+/*    private fun update() {
         ball.update()
 
         if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
@@ -187,8 +196,59 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
 
         postInvalidate()
-    }
+    }*/
 
+    private fun update() {
+        ball.update()
+
+        if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
+            ball.xVelocity = -ball.xVelocity
+        }
+        if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
+            ball.yVelocity = -ball.yVelocity
+        }
+
+        val obstaclesToRemove = mutableListOf<Obstacle>()
+        var hasCollided = false // nueva variable para controlar si la bola ha colisionado con algún obstáculo
+
+        for (obstacle in obstacles) {
+            if (obstacle.collidesWith(ball)) {
+                ball.xVelocity = -ball.xVelocity
+                ball.yVelocity = -ball.yVelocity
+                obstaclesToRemove.add(obstacle)
+                score += 1
+                hasCollided = true
+            }
+        }
+
+        synchronized(obstaclesLock) {
+            obstacles.removeAll(obstaclesToRemove)
+        }
+
+        // Generar nuevos obstáculos si ya no hay ninguno en la pantalla
+        if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
+            currentLevelIndex++
+            val currentLevel = levels[currentLevelIndex]
+            obstacles.addAll(createObstaclesForLevel(currentLevel))
+        } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
+            gameOver = true
+        }
+
+        // Mover los obstáculos
+        for (obstacle in obstacles) {
+            obstacle.x += obstacle.xVelocity
+            obstacle.y += obstacle.yVelocity
+
+            if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
+                obstacle.xVelocity = -obstacle.xVelocity
+            }
+            if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
+                obstacle.yVelocity = -obstacle.yVelocity
+            }
+        }
+
+        postInvalidate()
+    }
 
 
 

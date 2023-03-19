@@ -14,7 +14,9 @@ class Obstacle(
     val radius: Float,
     var xVelocity: Float,
     var yVelocity: Float,
-    val paint: Paint
+    val paint: Paint,
+    var scoreByLevel: Int = 0
+
 ) {
     fun draw(canvas: Canvas) {
         canvas.drawCircle(x, y, radius, paint)
