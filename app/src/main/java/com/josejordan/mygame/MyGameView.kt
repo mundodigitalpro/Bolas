@@ -2,7 +2,6 @@ package com.josejordan.mygame
 
 import android.content.Context
 import android.graphics.*
-import android.provider.SyncStateContract.Helpers.update
 import android.util.AttributeSet
 import android.view.SurfaceHolder
 import android.view.SurfaceView
@@ -56,8 +55,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     enum class GameState {
         Waiting,
         Playing,
-        GameOver,
-        PlayAgain
+        GameOver
     }
 
     private val scorePaint = Paint().apply {
@@ -179,25 +177,15 @@ override fun draw(canvas: Canvas?) {
     canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
 
     if (gameState == GameState.GameOver) {
-        val playAgainText = "GAME OVER"
-        val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
+        val gameOverText = "GAME OVER"
+        val playAgainWidth = playAndGameOverPaint.measureText(gameOverText)
         canvas.drawText(
-            playAgainText,
+            gameOverText,
             (width - playAgainWidth) / 2,
             height / 2f,
             playAndGameOverPaint
         )
-
-        val exitText = "EXIT"
-        val exitWidth = playAndGameOverPaint.measureText(exitText)
-        canvas.drawText(
-            exitText,
-            (width - exitWidth) / 2,
-            height / 2f + 100f,
-            playAndGameOverPaint
-        )
-    }
-    else if (gameState == GameState.Waiting) {
+    }else if (gameState == GameState.Waiting) {
         val playText = "PLAY"
         val playWidth = playAndGameOverPaint.measureText(playText)
         canvas.drawText(
@@ -206,155 +194,9 @@ override fun draw(canvas: Canvas?) {
             height / 2f,
             playAndGameOverPaint
         )
-    } else if (gameState == GameState.PlayAgain) {
-        val playAgainText = "PLAY AGAIN"
-        val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
-        canvas.drawText(
-            playAgainText,
-            (width - playAgainWidth) / 2,
-            height / 2f,
-            playAndGameOverPaint
-        )
     }
 }
 
-/*    override fun draw(canvas: Canvas?) {
-        super.draw(canvas)
-        canvas?.drawColor(Color.BLACK)
-        canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
-
-        // Copia de la lista de obstáculos actual
-        val currentObstacles: List<Obstacle>
-        synchronized(obstaclesLock) {
-            currentObstacles = ArrayList(obstacles)
-        }
-
-        // Dibujar cada obstáculo en la lista
-        for (obstacle in currentObstacles) {
-            obstacle.draw(canvas!!)
-        }
-
-        // Dibujar el enemigo
-        enemy.draw(canvas!!)
-
-        canvas.drawText("Score: $score", 50f, 100f, scorePaint)
-        canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
-        canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
-
-        if (gameState == GameState.GameOver) {
-            val playAgainText = "PLAY AGAIN"
-            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
-            canvas.drawText(
-                playAgainText,
-                (width - playAgainWidth) / 2,
-                height / 2f - 50f,
-                playAndGameOverPaint
-            )
-
-            val exitText = "EXIT"
-            val exitWidth = playAndGameOverPaint.measureText(exitText)
-            canvas.drawText(
-                exitText,
-                (width - exitWidth) / 2,
-                height / 2f + 50f,
-                playAndGameOverPaint
-            )
-        }
-        else if (gameState == GameState.Waiting) {
-            val playText = "PLAY"
-            val playWidth = playAndGameOverPaint.measureText(playText)
-            canvas.drawText(
-                playText,
-                (width - playWidth) / 2,
-                height / 2f,
-                playAndGameOverPaint
-            )
-        } else if (gameState == GameState.PlayAgain) {
-            val playAgainText = "PLAY AGAIN"
-            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
-            canvas.drawText(
-                playAgainText,
-                (width - playAgainWidth) / 2,
-                height / 2f,
-                playAndGameOverPaint
-            )
-        }
-    }*/
-
-/*    override fun draw(canvas: Canvas?) {
-        super.draw(canvas)
-        canvas?.drawColor(Color.BLACK)
-        canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
-
-        // Copia de la lista de obstáculos actual
-        val currentObstacles: List<Obstacle>
-        synchronized(obstaclesLock) {
-            currentObstacles = ArrayList(obstacles)
-        }
-
-        // Dibujar cada obstáculo en la lista
-        for (obstacle in currentObstacles) {
-            obstacle.draw(canvas!!)
-        }
-
-        // Dibujar el enemigo
-        enemy.draw(canvas!!)
-
-        canvas.drawText("Score: $score", 50f, 100f, scorePaint)
-        canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
-        canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
-
-        if (gameState == GameState.GameOver) {
-            val playAgainText = "PLAY AGAIN"
-            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
-            canvas.drawText(
-                playAgainText,
-                (width - playAgainWidth) / 2,
-                height / 2f - 50f,
-                playAndGameOverPaint
-            )
-
-            val exitText = "EXIT"
-            val exitWidth = playAndGameOverPaint.measureText(exitText)
-            canvas.drawText(
-                exitText,
-                (width - exitWidth) / 2,
-                height / 2f + 50f,
-                playAndGameOverPaint
-            )
-        } else if (gameState == GameState.Waiting) {
-            val playText = "PLAY"
-            val playWidth = playAndGameOverPaint.measureText(playText)
-            canvas.drawText(
-                playText,
-                (width - playWidth) / 2,
-                height / 2f,
-                playAndGameOverPaint
-            )
-        } else if (gameState == GameState.PlayAgain) {
-            val playAgainText = "PLAY AGAIN"
-            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
-            canvas.drawText(
-                playAgainText,
-                (width - playAgainWidth) / 2,
-                height / 2f,
-                playAndGameOverPaint
-            )
-        }
-    }*/
-
-
-
-    private var showExitButton = false
-
-    fun setShowExitButton(show: Boolean) {
-        showExitButton = show
-        invalidate() // redibuja la vista
-    }
-
-    fun getShowExitButton(): Boolean {
-        return showExitButton
-    }
     private fun update() {
         if (gameState == GameState.Playing) {
             ball.update()
@@ -425,13 +267,8 @@ override fun draw(canvas: Canvas?) {
         } else if (gameState == GameState.GameOver) {
             // game over
         }
-
         postInvalidate()
     }
-
-
-
-
 
     fun getGameState(): GameState {
         return gameState
@@ -444,7 +281,6 @@ override fun draw(canvas: Canvas?) {
         }
     }
 
-
     fun resetGame() {
         ball.resetPosition()
         currentLevelIndex = 0
@@ -454,17 +290,6 @@ override fun draw(canvas: Canvas?) {
         obstacles.clear()
         obstacles.addAll(createObstaclesForLevel(levels[currentLevelIndex]))
     }
-
-    fun isGameOverTouched(): Boolean {
-        return gameOverTouched
-    }
-
-    fun setGameOverTouched(touched: Boolean) {
-        gameOverTouched = touched
-    }
-
-
-
 
     inner class GameThread(private val holder: SurfaceHolder) : Thread() {
         private var running = true
