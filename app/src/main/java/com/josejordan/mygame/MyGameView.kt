@@ -60,13 +60,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         PlayAgain
     }
 
-    private val playPaint = Paint().apply {
-        color = Color.WHITE
-        textSize = 80f
-        typeface = Typeface.DEFAULT_BOLD
-        isAntiAlias = true
-    }
-
     private val scorePaint = Paint().apply {
         color = Color.WHITE
         textSize = 80f
@@ -76,10 +69,13 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     private val playAndGameOverPaint = Paint().apply {
         color = Color.WHITE
-        textSize = 80f
+        textSize = 150f
         typeface = Typeface.DEFAULT_BOLD
         isAntiAlias = true
     }
+
+    private var lives = 3
+
 
 
     init {
@@ -159,6 +155,131 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
     }
 
+/*override fun draw(canvas: Canvas?) {
+    super.draw(canvas)
+    canvas?.drawColor(Color.BLACK)
+    canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
+
+    // Copia de la lista de obstáculos actual
+    val currentObstacles: List<Obstacle>
+    synchronized(obstaclesLock) {
+        currentObstacles = ArrayList(obstacles)
+    }
+
+    // Dibujar cada obstáculo en la lista
+    for (obstacle in currentObstacles) {
+        obstacle.draw(canvas!!)
+    }
+
+    // Dibujar el enemigo
+    enemy.draw(canvas!!)
+
+    canvas.drawText("Score: $score", 50f, 100f, scorePaint)
+    canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
+    canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
+
+    if (gameState == GameState.GameOver) {
+        val playAgainText = "PLAY AGAIN"
+        val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
+        canvas.drawText(
+            playAgainText,
+            (width - playAgainWidth) / 2,
+            height / 2f,
+            playAndGameOverPaint
+        )
+
+        val exitText = "EXIT"
+        val exitWidth = playAndGameOverPaint.measureText(exitText)
+        canvas.drawText(
+            exitText,
+            (width - exitWidth) / 2,
+            height / 2f + 100f,
+            playAndGameOverPaint
+        )
+    }
+    else if (gameState == GameState.Waiting) {
+        val playText = "PLAY"
+        val playWidth = playAndGameOverPaint.measureText(playText)
+        canvas.drawText(
+            playText,
+            (width - playWidth) / 2,
+            height / 2f,
+            playAndGameOverPaint
+        )
+    } else if (gameState == GameState.PlayAgain) {
+        val playAgainText = "PLAY AGAIN"
+        val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
+        canvas.drawText(
+            playAgainText,
+            (width - playAgainWidth) / 2,
+            height / 2f,
+            playAndGameOverPaint
+        )
+    }
+}*/
+
+/*    override fun draw(canvas: Canvas?) {
+        super.draw(canvas)
+        canvas?.drawColor(Color.BLACK)
+        canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
+
+        // Copia de la lista de obstáculos actual
+        val currentObstacles: List<Obstacle>
+        synchronized(obstaclesLock) {
+            currentObstacles = ArrayList(obstacles)
+        }
+
+        // Dibujar cada obstáculo en la lista
+        for (obstacle in currentObstacles) {
+            obstacle.draw(canvas!!)
+        }
+
+        // Dibujar el enemigo
+        enemy.draw(canvas!!)
+
+        canvas.drawText("Score: $score", 50f, 100f, scorePaint)
+        canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
+        canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
+
+        if (gameState == GameState.GameOver) {
+            val playAgainText = "PLAY AGAIN"
+            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
+            canvas.drawText(
+                playAgainText,
+                (width - playAgainWidth) / 2,
+                height / 2f - 50f,
+                playAndGameOverPaint
+            )
+
+            val exitText = "EXIT"
+            val exitWidth = playAndGameOverPaint.measureText(exitText)
+            canvas.drawText(
+                exitText,
+                (width - exitWidth) / 2,
+                height / 2f + 50f,
+                playAndGameOverPaint
+            )
+        }
+        else if (gameState == GameState.Waiting) {
+            val playText = "PLAY"
+            val playWidth = playAndGameOverPaint.measureText(playText)
+            canvas.drawText(
+                playText,
+                (width - playWidth) / 2,
+                height / 2f,
+                playAndGameOverPaint
+            )
+        } else if (gameState == GameState.PlayAgain) {
+            val playAgainText = "PLAY AGAIN"
+            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
+            canvas.drawText(
+                playAgainText,
+                (width - playAgainWidth) / 2,
+                height / 2f,
+                playAndGameOverPaint
+            )
+        }
+    }*/
 
     override fun draw(canvas: Canvas?) {
         super.draw(canvas)
@@ -181,14 +302,24 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
         canvas.drawText("Score: $score", 50f, 100f, scorePaint)
         canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
+        canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
 
         if (gameState == GameState.GameOver) {
-            val text = if (gameOverTouched) "PLAY AGAIN" else "Game Over"
-            val textWidth = playAndGameOverPaint.measureText(text)
+            val playAgainText = "PLAY AGAIN"
+            val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
             canvas.drawText(
-                text,
-                (width - textWidth) / 2,
-                height / 2f,
+                playAgainText,
+                (width - playAgainWidth) / 2,
+                height / 2f - 50f,
+                playAndGameOverPaint
+            )
+
+            val exitText = "EXIT"
+            val exitWidth = playAndGameOverPaint.measureText(exitText)
+            canvas.drawText(
+                exitText,
+                (width - exitWidth) / 2,
+                height / 2f + 50f,
                 playAndGameOverPaint
             )
         } else if (gameState == GameState.Waiting) {
@@ -213,120 +344,17 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     }
 
 
-/*    private fun update() {
-        if (gameState == GameState.Playing) {
-            ball.update()
 
-            if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
-                ball.xVelocity = -ball.xVelocity
-            }
-            if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
-                ball.yVelocity = -ball.yVelocity
-            }
+    private var showExitButton = false
 
-            val obstaclesToRemove = mutableListOf<Obstacle>()
-            var hasCollided =
-                false // nueva variable para controlar si la bola ha colisionado con algún obstáculo
+    fun setShowExitButton(show: Boolean) {
+        showExitButton = show
+        invalidate() // redibuja la vista
+    }
 
-            for (obstacle in obstacles) {
-                if (obstacle.collidesWith(ball)) {
-                    ball.xVelocity = -ball.xVelocity
-                    ball.yVelocity = -ball.yVelocity
-                    obstaclesToRemove.add(obstacle)
-                    score += 1
-                    hasCollided = true
-                }
-            }
-
-            synchronized(obstaclesLock) {
-                obstacles.removeAll(obstaclesToRemove)
-            }
-
-            // Generar nuevos obstáculos si ya no hay ninguno en la pantalla
-            if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
-                currentLevelIndex++
-                val currentLevel = levels[currentLevelIndex]
-                obstacles.addAll(createObstaclesForLevel(currentLevel))
-            } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
-                gameState = GameState.GameOver
-            }
-
-            // Mover los obstáculos
-            for (obstacle in obstacles) {
-                obstacle.x += obstacle.xVelocity
-                obstacle.y += obstacle.yVelocity
-
-                if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
-                    obstacle.xVelocity = -obstacle.xVelocity
-                }
-                if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
-                    obstacle.yVelocity = -obstacle.yVelocity
-                }
-            }
-        }
-
-        postInvalidate()
-    }*/
-
-/*    private fun update() {
-        if (gameState == GameState.Playing) {
-            ball.update()
-
-            if (ball.x - ball.radius < 0 || ball.x + ball.radius > width) {
-                ball.xVelocity = -ball.xVelocity
-            }
-            if (ball.y - ball.radius < 0 || ball.y + ball.radius > height) {
-                ball.yVelocity = -ball.yVelocity
-            }
-
-            val obstaclesToRemove = mutableListOf<Obstacle>()
-            var hasCollided = false
-
-            for (obstacle in obstacles) {
-                if (obstacle.collidesWith(ball)) {
-                    ball.xVelocity = -ball.xVelocity
-                    ball.yVelocity = -ball.yVelocity
-                    obstaclesToRemove.add(obstacle)
-                    score += 1
-                    hasCollided = true
-                }
-            }
-
-            synchronized(obstaclesLock) {
-                obstacles.removeAll(obstaclesToRemove)
-            }
-
-            // Verificar si la bola colisiona con el enemigo
-            if (enemy.collidesWith(ball.x, ball.y, ball.radius)) {
-                ball.resetPosition()
-                gameOver = true
-                gameState = GameState.GameOver
-            }
-
-            if (obstacles.isEmpty() && !gameOver && currentLevelIndex < levels.lastIndex) {
-                currentLevelIndex++
-                val currentLevel = levels[currentLevelIndex]
-                obstacles.addAll(createObstaclesForLevel(currentLevel))
-            } else if (obstacles.isEmpty() && currentLevelIndex == levels.lastIndex) {
-                gameState = GameState.GameOver
-            }
-
-            for (obstacle in obstacles) {
-                obstacle.x += obstacle.xVelocity
-                obstacle.y += obstacle.yVelocity
-
-                if (obstacle.x - obstacle.radius < 0 || obstacle.x + obstacle.radius > width) {
-                    obstacle.xVelocity = -obstacle.xVelocity
-                }
-                if (obstacle.y - obstacle.radius < 0 || obstacle.y + obstacle.radius > height) {
-                    obstacle.yVelocity = -obstacle.yVelocity
-                }
-            }
-        }
-
-        postInvalidate()
-    }*/
-
+    fun getShowExitButton(): Boolean {
+        return showExitButton
+    }
     private fun update() {
         if (gameState == GameState.Playing) {
             ball.update()
@@ -339,7 +367,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             }
 
             val obstaclesToRemove = mutableListOf<Obstacle>()
-            var hasCollided = false
 
             for (obstacle in obstacles) {
                 if (obstacle.collidesWith(ball)) {
@@ -347,7 +374,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                     ball.yVelocity = -ball.yVelocity
                     obstaclesToRemove.add(obstacle)
                     score += 1
-                    hasCollided = true
                 }
             }
 
@@ -358,8 +384,11 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             // Verificar si la bola colisiona con el enemigo
             if (enemy.collidesWith(ball.x, ball.y, ball.radius)) {
                 ball.resetPosition()
-                gameOver = true
-                gameState = GameState.GameOver
+                lives -= 1
+                // Check if the game is over
+                if (lives <= 0) {
+                    gameState = GameState.GameOver
+                }
             }
 
             // Pasar al siguiente nivel si no hay obstáculos
@@ -393,6 +422,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             if (enemy.y < 0 || enemy.y + enemy.height > height) {
                 enemy.yVelocity = -enemy.yVelocity
             }
+        } else if (gameState == GameState.GameOver) {
+            // game over
         }
 
         postInvalidate()
@@ -400,19 +431,25 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
 
 
-    // En MyGameView
+
+
     fun getGameState(): GameState {
         return gameState
     }
 
     fun setGameState(state: GameState) {
         gameState = state
+        if (state == GameState.Playing || state == GameState.Waiting) {
+            gameOverTouched = false
+        }
     }
+
 
     fun resetGame() {
         ball.resetPosition()
         currentLevelIndex = 0
         score = 0
+        lives = 3 // restablecer las vidas a 3 al reiniciar el juego
         gameState = GameState.Waiting
         obstacles.clear()
         obstacles.addAll(createObstaclesForLevel(levels[currentLevelIndex]))

@@ -3,7 +3,6 @@ package com.josejordan.mygame
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import android.graphics.RectF
 import kotlin.math.abs
 
 class Enemy(
