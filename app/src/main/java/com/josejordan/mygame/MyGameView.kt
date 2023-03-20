@@ -155,7 +155,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
     }
 
-/*override fun draw(canvas: Canvas?) {
+override fun draw(canvas: Canvas?) {
     super.draw(canvas)
     canvas?.drawColor(Color.BLACK)
     canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
@@ -179,7 +179,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
 
     if (gameState == GameState.GameOver) {
-        val playAgainText = "PLAY AGAIN"
+        val playAgainText = "GAME OVER"
         val playAgainWidth = playAndGameOverPaint.measureText(playAgainText)
         canvas.drawText(
             playAgainText,
@@ -216,7 +216,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             playAndGameOverPaint
         )
     }
-}*/
+}
 
 /*    override fun draw(canvas: Canvas?) {
         super.draw(canvas)
@@ -281,7 +281,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
     }*/
 
-    override fun draw(canvas: Canvas?) {
+/*    override fun draw(canvas: Canvas?) {
         super.draw(canvas)
         canvas?.drawColor(Color.BLACK)
         canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
@@ -341,7 +341,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                 playAndGameOverPaint
             )
         }
-    }
+    }*/
 
 
 
