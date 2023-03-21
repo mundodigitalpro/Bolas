@@ -1,14 +1,15 @@
 package com.josejordan.mygame
 
-import android.app.Activity
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.view.MotionEvent
-import androidx.appcompat.app.AlertDialog
+import android.view.View
+import android.widget.Button
+import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
 
     private lateinit var gameView: MyGameView
+    private lateinit var exitButton: Button
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -16,46 +17,42 @@ class MainActivity : AppCompatActivity() {
 
         gameView = findViewById(R.id.my_game_view)
         gameView.requestFocus()
+        exitButton = findViewById(R.id.exitButton)
 
-        gameView.setOnTouchListener { view, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    if (gameView.getGameState() == MyGameView.GameState.Waiting) {
-                        gameView.setGameState(MyGameView.GameState.Playing)
-                    } else if (gameView.getGameState() == MyGameView.GameState.Playing) {
-                        gameView.moveTo(event.x, event.y)
-                    } else if (gameView.getGameState() == MyGameView.GameState.GameOver) {
-                        gameView.resetGame()
-                    }
-
-/*                    else if (gameView.getGameState() == MyGameView.GameState.Exit) {
-                        finish()
-                    }*/
-                }
-                MotionEvent.ACTION_UP -> {
-                    view.performClick()
+        gameView.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_DOWN) {
+                if (gameView.getGameState() == MyGameView.GameState.Waiting) {
+                    gameView.setGameState(MyGameView.GameState.Playing)
+                } else if (gameView.getGameState() == MyGameView.GameState.GameOver) {
+                    gameView.resetGame()
+                    updateExitButtonVisibility()
+                } else {
+                    gameView.performClick()
+                    gameView.moveTo(event.x, event.y)
                 }
             }
             true
         }
 
-
-
-
-    }
-    fun showExitDialog() {
-        val builder = AlertDialog.Builder(this)
-        builder.setTitle("Salir del juego")
-        builder.setMessage("¿Está seguro que desea salir del juego?")
-        builder.setPositiveButton("Sí") { _, _ ->
-            // Finaliza la actividad para salir del juego
-            (this as Activity).finish()
+        exitButton.setOnClickListener {
+            finish()
         }
-        builder.setNegativeButton("No") { dialog, _ ->
-            dialog.dismiss()
+
+        gameView.onGameOver = {
+            runOnUiThread {
+                updateExitButtonVisibility()
+            }
         }
-        builder.show()
+
+        updateExitButtonVisibility()
     }
 
+    private fun updateExitButtonVisibility() {
+        if (gameView.getGameState() == MyGameView.GameState.GameOver) {
+            exitButton.visibility = View.VISIBLE
+        } else {
+            exitButton.visibility = View.GONE
+        }
+    }
 }
 

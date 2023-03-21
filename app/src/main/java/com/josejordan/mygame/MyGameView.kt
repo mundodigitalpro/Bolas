@@ -14,14 +14,12 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private val paint = Paint()
     private lateinit var ball: Ball
     private lateinit var enemy: Enemy
-
     private var obstacles: MutableList<Obstacle> = mutableListOf()
     private val obstaclesLock = Any()
     private val scoreLock = Any()
     private var score = 0 // variable de puntuación
     private var currentLevel = 0 // nivel actual
     private var gameOverTouched = false
-
     private val levels = listOf(
         Level(
             10f,
@@ -47,9 +45,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         Level(55f, 55, 100)  // nivel 10 con velocidad de bola 55, 55 obstáculos y umbral de puntuación de 100*/
     )
     private var currentLevelIndex = 0 // nivel actual
-
     private var gameOver = false
-
     private var gameState: GameState = GameState.Waiting
 
     enum class GameState {
@@ -72,8 +68,9 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         typeface = Typeface.DEFAULT_BOLD
         isAntiAlias = true
     }
-
     private var lives = 3
+    var onGameOver: (() -> Unit)? = null
+    var onGameRestart: (() -> Unit)? = null
 
     init {
         holder.addCallback(this)
@@ -175,7 +172,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         canvas.drawText("Score: $score", 50f, 100f, scorePaint)
         canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
         canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
-        //canvas.drawText("Exit", 50f, 400f, scorePaint)
 
         if (gameState == GameState.GameOver) {
             val gameOverText = "GAME OVER"
@@ -196,17 +192,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                 playAndGameOverPaint
             )
         }
-        /*
-        else (gameState == GameState.Exit)
-          val exitText = "EXIT"
-            val exitWidth = playAndGameOverPaint.measureText(exitText)
-            canvas.drawText(
-                exitText,
-                (width - exitWidth) / 2,
-                height / 2f + 50,
-                playAndGameOverPaint
-            )*/
-
     }
 
 
@@ -243,6 +228,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                 // Check if the game is over
                 if (lives <= 0) {
                     gameState = GameState.GameOver
+                    onGameOver?.invoke()
                 }
             }
 
@@ -254,6 +240,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                     obstacles.addAll(createObstaclesForLevel(currentLevel))
                 } else {
                     gameState = GameState.GameOver
+                    onGameRestart?.invoke()
                 }
             }
 
@@ -282,6 +269,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
         postInvalidate()
     }
+
 
     fun getGameState(): GameState {
         return gameState
