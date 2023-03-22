@@ -2,6 +2,7 @@ package com.josejordan.mygame
 
 import android.content.Context
 import android.graphics.*
+import android.media.MediaPlayer
 import android.util.AttributeSet
 import android.util.Log
 import android.view.SurfaceHolder
@@ -71,6 +72,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private var lives = 3
     var onGameOver: (() -> Unit)? = null
     var onGameRestart: (() -> Unit)? = null
+    private val pop = MediaPlayer.create(context, R.raw.pop)
+    private val error = MediaPlayer.create(context, R.raw.error)
 
 
     init {
@@ -99,7 +102,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             // Actualiza el TextView para mostrar la puntuación más alta en MainActivity
             val mainActivity = context as MainActivity
             mainActivity.highScoreTextView.text = context.getString(R.string.high_score, score)
-            //mainActivity.highScoreTextView.text = score.toString()
+
         }
     }
 
@@ -173,6 +176,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     override fun draw(canvas: Canvas?) {
         super.draw(canvas)
+
+
         canvas?.drawColor(Color.BLACK)
         canvas?.drawCircle(ball.x, ball.y, ball.radius, paint)
 
@@ -235,7 +240,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                     ball.yVelocity = -ball.yVelocity
                     obstaclesToRemove.add(obstacle)
                     score += 1
-                }
+                    pop.start()
+                       }
             }
 
             synchronized(obstaclesLock) {
@@ -244,6 +250,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
             // Verificar si la bola colisiona con el enemigo
             if (enemy.collidesWith(ball.x, ball.y, ball.radius)) {
+                error.start()
                 ball.resetPosition()
                 lives -= 1
                 // Check if the game is over
