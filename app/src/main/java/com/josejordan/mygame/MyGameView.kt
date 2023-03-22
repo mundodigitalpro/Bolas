@@ -3,6 +3,7 @@ package com.josejordan.mygame
 import android.content.Context
 import android.graphics.*
 import android.util.AttributeSet
+import android.util.Log
 import android.view.SurfaceHolder
 import android.view.SurfaceView
 import kotlin.math.sqrt
@@ -51,13 +52,12 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     enum class GameState {
         Waiting,
         Playing,
-        GameOver,
-        Exit
+        GameOver
     }
 
     private val scorePaint = Paint().apply {
         color = Color.WHITE
-        textSize = 80f
+        textSize = 55f
         typeface = Typeface.DEFAULT_BOLD
         isAntiAlias = true
     }
@@ -72,6 +72,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     var onGameOver: (() -> Unit)? = null
     var onGameRestart: (() -> Unit)? = null
 
+
     init {
         holder.addCallback(this)
         paint.color = Color.WHITE
@@ -80,6 +81,26 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     companion object {
         private const val OBSTACLE_LIMIT =
             10 // variable para limitar el número de obstáculos en pantalla
+        const val HIGH_SCORE_KEY = "HIGH_SCORE"
+    }
+
+
+    private fun updateHighScore() {
+        val prefs = context.getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
+        val highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
+        Log.d("MyGameView", "HIGH SCORE gameview: $highScore")
+        Log.d("MyGameView", "SCORE gameview: $score")
+
+        if (score > highScore) {
+            with(prefs.edit()) {
+                putInt(HIGH_SCORE_KEY, score)
+                apply()
+            }
+            // Actualiza el TextView para mostrar la puntuación más alta en MainActivity
+            val mainActivity = context as MainActivity
+            mainActivity.highScoreTextView.text = context.getString(R.string.high_score, score)
+            //mainActivity.highScoreTextView.text = score.toString()
+        }
     }
 
     override fun performClick(): Boolean {
@@ -284,12 +305,15 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     fun resetGame() {
         ball.resetPosition()
+        Log.d("MyGameView", "Game reset - score: $score")
+        updateHighScore()
         currentLevelIndex = 0
         score = 0
         lives = 3 // restablecer las vidas a 3 al reiniciar el juego
         gameState = GameState.Waiting
         obstacles.clear()
         obstacles.addAll(createObstaclesForLevel(levels[currentLevelIndex]))
+
     }
 
     inner class GameThread(private val holder: SurfaceHolder) : Thread() {
