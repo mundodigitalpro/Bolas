@@ -19,16 +19,10 @@
         android:layout_gravity="bottom|center_horizontal"
         android:background="@drawable/button_rounded_background"
         android:elevation="6dp"
-        android:text="SALIR"
+        android:text="@string/exit"
         android:textColor="#FFFFFF"
         android:textSize="18sp"
         android:textStyle="bold"
         android:visibility="gone" />
-<!--    <Button
-        android:id="@+id/exitButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Salir"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="16dp" />-->
+
 </FrameLayout>
