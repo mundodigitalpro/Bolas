@@ -2,7 +2,6 @@ package com.josejordan.mygame
 
 import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
@@ -24,11 +23,6 @@ class MainActivity : AppCompatActivity() {
         exitButton = findViewById(R.id.exitButton)
         highScoreTextView = findViewById(R.id.highScoreTextView)
 
-        // Obtiene la puntuación más alta guardada en SharedPreferences y la muestra en el TextView
-/*        val prefs = getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
-        val highScore = prefs.getInt("HIGH_SCORE", 0)
-        highScoreTextView.text = getString(R.string.high_score, highScore)*/
-
         val prefs = getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
         if (prefs.contains(MyGameView.HIGH_SCORE_KEY)) {
             val highScore = prefs.getInt(MyGameView.HIGH_SCORE_KEY, 0)
@@ -36,9 +30,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             highScoreTextView.text = getString(R.string.high_score, 0)
         }
-        Log.d("MainActivity", "High score main: ${highScoreTextView.text}")
-
-
 
         gameView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {

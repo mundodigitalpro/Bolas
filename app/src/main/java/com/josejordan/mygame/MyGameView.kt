@@ -1,5 +1,6 @@
 package com.josejordan.mygame
 
+import android.app.GameState
 import android.content.Context
 import android.graphics.*
 import android.media.MediaPlayer
@@ -20,34 +21,14 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private val obstaclesLock = Any()
     private val scoreLock = Any()
     private var score = 0 // variable de puntuación
-    private var currentLevel = 0 // nivel actual
+    private var currentLevel = Level(0F, 0, 0) // nivel actual
     private var gameOverTouched = false
     private val levels = listOf(
-        Level(
-            10f,
-            10,
-            10
-        ),  // nivel 1 con velocidad de bola 10, 10 obstáculos y umbral de puntuación de 10
-        Level(
-            15f,
-            15,
-            20
-        ),  // nivel 2 con velocidad de bola 15, 15 obstáculos y umbral de puntuación de 20
-        Level(
-            20f,
-            20,
-            30
-        ),  // nivel 3 con velocidad de bola 20, 20 obstáculos y umbral de puntuación de 30
-/*        Level(25f, 25, 40),  // nivel 4 con velocidad de bola 25, 25 obstáculos y umbral de puntuación de 40
-        Level(30f, 30, 50),  // nivel 5 con velocidad de bola 30, 30 obstáculos y umbral de puntuación de 50
-        Level(35f, 35, 60),  // nivel 6 con velocidad de bola 35, 35 obstáculos y umbral de puntuación de 60
-        Level(40f, 40, 70),  // nivel 7 con velocidad de bola 40, 40 obstáculos y umbral de puntuación de 70
-        Level(45f, 45, 80),  // nivel 8 con velocidad de bola 45, 45 obstáculos y umbral de puntuación de 80
-        Level(50f, 50, 90),  // nivel 9 con velocidad de bola 50, 50 obstáculos y umbral de puntuación de 90
-        Level(55f, 55, 100)  // nivel 10 con velocidad de bola 55, 55 obstáculos y umbral de puntuación de 100*/
+        Level(10f, 10, R.raw.mubert),
+        Level(10f, 15, R.raw.retro),
+        Level(10f, 20, R.raw.land)
     )
     private var currentLevelIndex = 0 // nivel actual
-    private var gameOver = false
     private var gameState: GameState = GameState.Waiting
 
     enum class GameState {
@@ -73,8 +54,12 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     var onGameOver: (() -> Unit)? = null
     var onGameRestart: (() -> Unit)? = null
     private val pop = MediaPlayer.create(context, R.raw.pop)
+    private val bubble = MediaPlayer.create(context, R.raw.bubble)
     private val error = MediaPlayer.create(context, R.raw.error)
-
+    private val retro = MediaPlayer.create(context, R.raw.retro)
+    private val land = MediaPlayer.create(context, R.raw.land)
+    private val mubert = MediaPlayer.create(context, R.raw.mubert)
+    private var mediaPlayer: MediaPlayer? = null
 
     init {
         holder.addCallback(this)
@@ -82,8 +67,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     }
 
     companion object {
-        private const val OBSTACLE_LIMIT =
-            10 // variable para limitar el número de obstáculos en pantalla
+        //private const val OBSTACLE_LIMIT = 10 // variable para limitar el número de obstáculos en pantalla
         const val HIGH_SCORE_KEY = "HIGH_SCORE"
     }
 
@@ -91,8 +75,6 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private fun updateHighScore() {
         val prefs = context.getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
         val highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
-        Log.d("MyGameView", "HIGH SCORE gameview: $highScore")
-        Log.d("MyGameView", "SCORE gameview: $score")
 
         if (score > highScore) {
             with(prefs.edit()) {
@@ -127,6 +109,15 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         val speedMultiplier = currentLevelIndex + 1
         val speed = ballSpeed * speedMultiplier
 
+        // Liberar los recursos de la melodía anterior
+        mediaPlayer?.release()
+
+        // Cargar y reproducir la nueva melodía
+        mediaPlayer = MediaPlayer.create(context, level.melodyId)
+        mediaPlayer?.start()
+        mediaPlayer?.setVolume(0.5f, 0.5f)
+        mediaPlayer?.isLooping = true
+
         // Nueva variable para mantener la puntuación de cada nivel
         val scoreByLevel = score
         return Obstacle.createRandomObstacles(
@@ -153,6 +144,19 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                 5f,
                 5f
             )
+
+/*
+            // Liberar la instancia previa de MediaPlayer
+            mediaPlayer?.release()
+
+            // Inicializar la melodía para el nivel actual
+            val currentLevel = levels[currentLevelIndex]
+            val mediaPlayer = MediaPlayer.create(context, currentLevel.melodyId)
+            mediaPlayer.start()
+            mediaPlayer.setVolume(0.5f, 0.5f)
+            mediaPlayer.isLooping = true
+*/
+
             thread = GameThread(holder)
             thread?.start()
         }
@@ -163,6 +167,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder) {
+        //mubert.release()
         var retry = true
         while (retry) {
             try {
@@ -196,7 +201,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         enemy.draw(canvas!!)
 
         canvas.drawText("Score: $score", 50f, 100f, scorePaint)
-        canvas.drawText("Level: ${currentLevelIndex + 1}", 50f, 200f, scorePaint)
+        canvas.drawText("Level: ${currentLevelIndex}", 50f, 200f, scorePaint)
         canvas.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
 
         if (gameState == GameState.GameOver) {
@@ -241,7 +246,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
                     obstaclesToRemove.add(obstacle)
                     score += 1
                     pop.start()
-                       }
+                }
             }
 
             synchronized(obstaclesLock) {
@@ -264,7 +269,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             if (obstacles.isEmpty()) {
                 if (currentLevelIndex < levels.lastIndex) {
                     currentLevelIndex++
-                    val currentLevel = levels[currentLevelIndex]
+                    currentLevel = levels[currentLevelIndex]
                     obstacles.addAll(createObstaclesForLevel(currentLevel))
                 } else {
                     gameState = GameState.GameOver
@@ -312,9 +317,9 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
 
     fun resetGame() {
         ball.resetPosition()
-        Log.d("MyGameView", "Game reset - score: $score")
         updateHighScore()
-        currentLevelIndex = 0
+        currentLevel = Level(0F, 0, 0)
+        currentLevelIndex = 1
         score = 0
         lives = 3 // restablecer las vidas a 3 al reiniciar el juego
         gameState = GameState.Waiting
