@@ -2,5 +2,6 @@
     <string name="app_name">MyGame</string>
     <string name="exit">Exit</string>
     <string name="high_score">High Score: %d</string>
+    <string name="pause">pause</string>
 
 </resources>

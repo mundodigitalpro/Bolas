@@ -31,14 +31,16 @@ class Obstacle(
 
     companion object {
         private val random = Random(System.currentTimeMillis())
-
         private val colors = listOf(
             Color.RED,
             Color.GREEN,
             Color.BLUE,
             Color.YELLOW,
             Color.CYAN,
-            Color.MAGENTA
+            Color.MAGENTA,
+            Color.DKGRAY,
+            Color.LTGRAY,
+            Color.GRAY
         )
 
         fun createRandomObstacles(
