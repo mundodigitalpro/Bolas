@@ -1,15 +1,21 @@
 package com.josejordan.mygame
 
+import android.app.AlertDialog
 import android.content.Context
 import android.graphics.drawable.Drawable
+import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
+import android.view.WindowInsets
+import android.view.WindowInsetsController
 import android.widget.Button
 import android.widget.ImageButton
 import android.widget.TextView
+import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.WindowInsetsControllerCompat
+import kotlin.system.exitProcess
+
 
 class MainActivity : AppCompatActivity() {
 
@@ -18,17 +24,27 @@ class MainActivity : AppCompatActivity() {
     private lateinit var pauseButton: ImageButton
     private lateinit var pauseButtonIcon: Drawable
     private var isPaused = false
-
     lateinit var highScoreTextView: TextView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        //hide the status bar and navigation buttons
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightStatusBars = false
-        WindowInsetsControllerCompat(window, window.decorView).isAppearanceLightNavigationBars = false
-        window.decorView.systemUiVisibility = View.SYSTEM_UI_FLAG_FULLSCREEN or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION or View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-
         setContentView(R.layout.activity_main)
+
+        //hide the status bar and navigation buttons
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            val controller = window.insetsController
+            if (controller != null) {
+                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.hide(WindowInsets.Type.systemBars())
+            }
+        } else {
+            // Use the deprecated method for older Android versions
+            @Suppress("DEPRECATION")
+            window.decorView.systemUiVisibility = (View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION)
+        }
+
 
         gameView = findViewById(R.id.my_game_view)
         gameView.requestFocus()
@@ -45,8 +61,6 @@ class MainActivity : AppCompatActivity() {
         } else {
             highScoreTextView.text = getString(R.string.high_score, 0)
         }
-
-
 
         gameView.setOnTouchListener { _, event ->
             if (!isPaused) {
@@ -66,8 +80,24 @@ class MainActivity : AppCompatActivity() {
         }
 
         exitButton.setOnClickListener {
-            finish()
+            onBackPressedDispatcher.onBackPressed()
         }
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                AlertDialog.Builder(this@MainActivity)
+                    .setTitle("Exit")
+                    .setMessage("Are you sure you want to exit?")
+                    .setPositiveButton("Yes") { _, _ ->
+                        finishAffinity()
+                        exitProcess(0) // This will close the app and all its activities
+
+                    }
+                    .setNegativeButton("No", null)
+                    .show()
+            }
+        })
+
 
         pauseButton.setOnClickListener {
             if (gameView.getGameState() == MyGameView.GameState.Playing) {
@@ -84,15 +114,11 @@ class MainActivity : AppCompatActivity() {
             updateExitButtonVisibility()
         }
 
-
-
-
         gameView.onGameOver = {
             runOnUiThread {
                 updateExitButtonVisibility()
             }
         }
-
         updateExitButtonVisibility()
 
     }
@@ -111,7 +137,6 @@ class MainActivity : AppCompatActivity() {
         }
         true
     }
-
     private fun updateExitButtonVisibility() {
         if (gameView.getGameState() == MyGameView.GameState.GameOver || gameView.getGameState() == MyGameView.GameState.Paused) {
             exitButton.visibility = View.VISIBLE
@@ -119,6 +144,5 @@ class MainActivity : AppCompatActivity() {
             exitButton.visibility = View.GONE
         }
     }
-
 }
 
