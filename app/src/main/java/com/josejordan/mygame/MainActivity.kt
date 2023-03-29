@@ -1,10 +1,12 @@
 package com.josejordan.mygame
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.MotionEvent
 import android.view.View
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowInsetsControllerCompat
@@ -13,7 +15,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var gameView: MyGameView
     private lateinit var exitButton: Button
-    private lateinit var pauseButton: Button
+    private lateinit var pauseButton: ImageButton
+    private lateinit var pauseButtonIcon: Drawable
+    private var isPaused = false
 
     lateinit var highScoreTextView: TextView
 
@@ -31,7 +35,7 @@ class MainActivity : AppCompatActivity() {
 
         exitButton = findViewById(R.id.exitButton)
         pauseButton = findViewById(R.id.pauseButton)
-
+        pauseButtonIcon = pauseButton.background
         highScoreTextView = findViewById(R.id.highScoreTextView)
 
         val prefs = getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
@@ -45,18 +49,17 @@ class MainActivity : AppCompatActivity() {
 
 
         gameView.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                if (gameView.getGameState() == MyGameView.GameState.Waiting) {
-                    gameView.setGameState(MyGameView.GameState.Playing)
-                } else if (gameView.getGameState() == MyGameView.GameState.GameOver) {
-                    gameView.resetGame()
-                    updateExitButtonVisibility()
-                } else if (gameView.getGameState() == MyGameView.GameState.Paused) {
-                    gameView.setGameState(MyGameView.GameState.Playing)
-                    updateExitButtonVisibility()
-                } else {
-                    gameView.performClick()
-                    gameView.moveTo(event.x, event.y)
+            if (!isPaused) {
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    if (gameView.getGameState() == MyGameView.GameState.Waiting) {
+                        gameView.setGameState(MyGameView.GameState.Playing)
+                    } else if (gameView.getGameState() == MyGameView.GameState.GameOver) {
+                        gameView.resetGame()
+                        updateExitButtonVisibility()
+                    } else {
+                        gameView.performClick()
+                        gameView.moveTo(event.x, event.y)
+                    }
                 }
             }
             true
@@ -70,12 +73,17 @@ class MainActivity : AppCompatActivity() {
             if (gameView.getGameState() == MyGameView.GameState.Playing) {
                 gameView.setGameState(MyGameView.GameState.Paused)
                 gameView.pauseMediaPlayer()
+                gameView.setOnTouchListener(null) // Remove the onTouchListener when game is paused
+                pauseButton.setImageResource(R.drawable.ic_play)
             } else if (gameView.getGameState() == MyGameView.GameState.Paused) {
                 gameView.setGameState(MyGameView.GameState.Playing)
                 gameView.resumeMediaPlayer()
+                gameView.setOnTouchListener(onTouchListener) // Set the onTouchListener back when game is resumed
+                pauseButton.setImageResource(R.drawable.ic_pause)
             }
             updateExitButtonVisibility()
         }
+
 
 
 
@@ -88,14 +96,21 @@ class MainActivity : AppCompatActivity() {
         updateExitButtonVisibility()
 
     }
-
-/*    private fun updateExitButtonVisibility() {
-        if (gameView.getGameState() == MyGameView.GameState.GameOver) {
-            exitButton.visibility = View.VISIBLE
-        } else {
-            exitButton.visibility = View.GONE
+    // Define the onTouchListener outside of onCreate method so it can be reused
+    private val onTouchListener = View.OnTouchListener { _, event ->
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            if (gameView.getGameState() == MyGameView.GameState.Waiting) {
+                gameView.setGameState(MyGameView.GameState.Playing)
+            } else if (gameView.getGameState() == MyGameView.GameState.GameOver) {
+                gameView.resetGame()
+                updateExitButtonVisibility()
+            } else {
+                gameView.performClick()
+                gameView.moveTo(event.x, event.y)
+            }
         }
-    }*/
+        true
+    }
 
     private fun updateExitButtonVisibility() {
         if (gameView.getGameState() == MyGameView.GameState.GameOver || gameView.getGameState() == MyGameView.GameState.Paused) {

@@ -28,10 +28,10 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private var currentLevel = Level(0F, 0, 0,0) // nivel actual
     private var gameOverTouched = false
     private val levels = listOf(
-        Level(3f, 3, R.raw.mubert,0),
-        Level(5f, 5, R.raw.retro,1),
-        Level(6f, 6, R.raw.land,2),
-        Level(7f, 7, R.raw.land,3),
+        Level(3f, 3, R.raw.space,0),
+        Level(5f, 5, R.raw.ware,1),
+        Level(6f, 6, R.raw.robot,2),
+        Level(7f, 7, R.raw.retro,3),
         Level(8f, 8, R.raw.land,4)
     )
     private var currentLevelIndex = -1 // nivel actual
@@ -61,11 +61,13 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     var onGameOver: (() -> Unit)? = null
     var onGameRestart: (() -> Unit)? = null
     private val pop = MediaPlayer.create(context, R.raw.pop)
-    private val bubble = MediaPlayer.create(context, R.raw.bubble)
+    private val space = MediaPlayer.create(context, R.raw.space)
+    private val ware = MediaPlayer.create(context, R.raw.ware)
+    private val robot = MediaPlayer.create(context, R.raw.robot)
     private val error = MediaPlayer.create(context, R.raw.error)
     private val retro = MediaPlayer.create(context, R.raw.retro)
     private val land = MediaPlayer.create(context, R.raw.land)
-    private val mubert = MediaPlayer.create(context, R.raw.mubert)
+
     private var mediaPlayer: MediaPlayer? = null
     private var pause = false
     private var mediaPlayerCurrentPosition: Int = 0

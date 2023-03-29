@@ -13,15 +13,14 @@
         android:keepScreenOn="true"
         android:visibility="visible" />
 
-    <Button
+    <android.widget.ImageButton
         android:id="@+id/pauseButton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center_horizontal"
-        android:text="@string/pause"
         android:textColor="#FFFFFF"
-        android:textSize="18sp"
-        android:textStyle="bold" />
+        android:src="@drawable/ic_pause"
+        android:background="@android:color/transparent"/>
 
     <TextView
         android:id="@+id/highScoreTextView"
@@ -43,7 +42,7 @@
         android:background="@drawable/button_rounded_background"
         android:elevation="6dp"
         android:text="@string/exit"
-        android:textColor="#FFFFFF"
+        android:textColor="#090000"
         android:textSize="18sp"
         android:textStyle="bold"
         android:visibility="gone" />
