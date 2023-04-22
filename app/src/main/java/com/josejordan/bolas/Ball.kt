@@ -1,4 +1,4 @@
-package com.josejordan.mygame
+package com.josejordan.bolas
 
 class Ball(var x: Float, var y: Float, var radius: Float, var xVelocity: Float, var yVelocity: Float) {
 

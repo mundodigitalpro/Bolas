@@ -1,9 +1,9 @@
-package com.josejordan.mygame
+package com.josejordan.bolas
 
-import android.graphics.Color
-import kotlin.random.Random
+//import android.graphics.Color
+//import kotlin.random.Random
 
-class Colors {
+/*class Colors {
     companion object {
         val random = Random(System.currentTimeMillis())
         val colors = listOf(
@@ -18,4 +18,4 @@ class Colors {
             Color.GRAY
         )
     }
-}
+}*/

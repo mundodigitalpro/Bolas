@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <com.josejordan.mygame.MyGameView
+    <com.josejordan.bolas.MyGameView
         android:id="@+id/my_game_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

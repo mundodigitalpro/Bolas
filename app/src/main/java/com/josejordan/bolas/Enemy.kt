@@ -1,4 +1,4 @@
-package com.josejordan.mygame
+package com.josejordan.bolas
 
 import android.graphics.Canvas
 import android.graphics.Color

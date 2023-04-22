@@ -1,4 +1,4 @@
-package com.josejordan.mygame
+package com.josejordan.bolas
 
 import android.app.AlertDialog
 import android.content.Context

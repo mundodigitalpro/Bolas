@@ -1,13 +1,11 @@
-package com.josejordan.mygame
+package com.josejordan.bolas
 
-import android.app.GameState
 import android.content.Context
 import android.graphics.*
 import android.media.MediaPlayer
 import android.util.AttributeSet
 import android.view.SurfaceHolder
 import android.view.SurfaceView
-import java.util.*
 import kotlin.collections.ArrayList
 import kotlin.math.sqrt
 
@@ -18,12 +16,12 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private val paint = Paint()
     private lateinit var ball: Ball
     private lateinit var enemy: Enemy
-    private lateinit var obstacle: Obstacle
+    //private lateinit var obstacle: Obstacle
     private var obstacles: MutableList<Obstacle> = mutableListOf()
     private var enemies: MutableList<Enemy> = mutableListOf()
     private val obstaclesLock = Any()
     private val enemiesLock = Any()
-    private val scoreLock = Any()
+    //private val scoreLock = Any()
     private var score = 0 // variable de puntuación
     private var currentLevel = Level(0F, 0, 0,0) // nivel actual
     private var gameOverTouched = false
@@ -70,17 +68,17 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     var onGameRestart: (() -> Unit)? = null
 
     private val pop = MediaPlayer.create(context, R.raw.pop)
-    private val space = MediaPlayer.create(context, R.raw.space)
-    private val ware = MediaPlayer.create(context, R.raw.ware)
-    private val robot = MediaPlayer.create(context, R.raw.robot)
+    //private val space = MediaPlayer.create(context, R.raw.space)
+    //private val ware = MediaPlayer.create(context, R.raw.ware)
+   // private val robot = MediaPlayer.create(context, R.raw.robot)
     private val error = MediaPlayer.create(context, R.raw.error)
-    private val retro = MediaPlayer.create(context, R.raw.retro)
-    private val land = MediaPlayer.create(context, R.raw.land)
+    //private val retro = MediaPlayer.create(context, R.raw.retro)
+    //private val land = MediaPlayer.create(context, R.raw.land)
     private var mediaPlayer: MediaPlayer? = null
     private var pause = false
     private var mediaPlayerCurrentPosition: Int = 0
 
-    private val mediaPlayerList = mutableListOf<MediaPlayer>().apply {
+/*    private val mediaPlayerList = mutableListOf<MediaPlayer>().apply {
         add(MediaPlayer.create(context, R.raw.pop))
         add(MediaPlayer.create(context, R.raw.space))
         add(MediaPlayer.create(context, R.raw.ware))
@@ -88,16 +86,16 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         add(MediaPlayer.create(context, R.raw.error))
         add(MediaPlayer.create(context, R.raw.retro))
         add(MediaPlayer.create(context, R.raw.land))
-    }
+    }*/
 
 
     init {
         holder.addCallback(this)
         paint.color = Color.WHITE
     }
-    fun pause() {
+/*    fun pause() {
         pause = !pause
-    }
+    }*/
 
     fun pauseMediaPlayer() {
         if (mediaPlayer!!.isPlaying) {
@@ -174,7 +172,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             .onEach { it.scoreByLevel = scoreByLevel }
     }
 
-    fun createObstaclesForLevel1(level: Level): List<Obstacle> {
+/*    fun createObstaclesForLevel1(level: Level): List<Obstacle> {
 
         //Obtener un color aleatorio de Colors.kt
         val color = Colors.colors[Colors.random.nextInt(Colors.colors.size)]
@@ -189,8 +187,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             obstacleList.add(obstacle)
         }
         return obstacleList
-    }
-    fun createEnemiesForLevel(level: Level): List<Enemy> {
+    }*/
+private fun createEnemiesForLevel(level: Level): List<Enemy> {
         val enemyList = mutableListOf<Enemy>()
         for (i in 0 until level.enemyCount) {
             enemy = Enemy(width.toFloat() / 4,height.toFloat() /4, 100f,100f,5f,5f)
@@ -256,7 +254,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         }
 
         canvas?.drawText("Score: $score", 50f, 100f, scorePaint)
-        canvas?.drawText("Level: ${currentLevelIndex}", 50f, 200f, scorePaint)
+        canvas?.drawText("Level: $currentLevelIndex", 50f, 200f, scorePaint)
         canvas?.drawText("Lives: $lives", 50f, 300f, scorePaint) // Muestra la cantidad de vidas
 
         if (gameState == GameState.GameOver) {
@@ -358,9 +356,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             }
 
 
-        } else if (gameState == GameState.GameOver) {
-
-        }
+        } else (gameState == GameState.GameOver)
         postInvalidate()
     }
 
@@ -418,8 +414,8 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
             }
         }
 
-        fun stopThread() {
+/*        fun stopThread() {
             running = false
-        }
+        }*/
     }
 }
