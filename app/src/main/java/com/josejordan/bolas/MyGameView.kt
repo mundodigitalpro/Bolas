@@ -16,14 +16,12 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private val paint = Paint()
     private lateinit var ball: Ball
     private lateinit var enemy: Enemy
-    //private lateinit var obstacle: Obstacle
     private var obstacles: MutableList<Obstacle> = mutableListOf()
     private var enemies: MutableList<Enemy> = mutableListOf()
     private val obstaclesLock = Any()
     private val enemiesLock = Any()
-    //private val scoreLock = Any()
-    private var score = 0 // variable de puntuación
-    private var currentLevel = Level(0F, 0, 0,0) // nivel actual
+    private var score = 0
+    private var currentLevel = Level(0F, 0, 0,0)
     private var gameOverTouched = false
     private val levels = listOf(
         Level(3f, 3, R.raw.space,0),
@@ -65,37 +63,19 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     }
     private var lives = 3
     var onGameOver: (() -> Unit)? = null
-    var onGameRestart: (() -> Unit)? = null
+    private var onGameRestart: (() -> Unit)? = null
 
     private val pop = MediaPlayer.create(context, R.raw.pop)
-    //private val space = MediaPlayer.create(context, R.raw.space)
-    //private val ware = MediaPlayer.create(context, R.raw.ware)
-   // private val robot = MediaPlayer.create(context, R.raw.robot)
     private val error = MediaPlayer.create(context, R.raw.error)
-    //private val retro = MediaPlayer.create(context, R.raw.retro)
-    //private val land = MediaPlayer.create(context, R.raw.land)
+
     private var mediaPlayer: MediaPlayer? = null
     private var pause = false
     private var mediaPlayerCurrentPosition: Int = 0
-
-/*    private val mediaPlayerList = mutableListOf<MediaPlayer>().apply {
-        add(MediaPlayer.create(context, R.raw.pop))
-        add(MediaPlayer.create(context, R.raw.space))
-        add(MediaPlayer.create(context, R.raw.ware))
-        add(MediaPlayer.create(context, R.raw.robot))
-        add(MediaPlayer.create(context, R.raw.error))
-        add(MediaPlayer.create(context, R.raw.retro))
-        add(MediaPlayer.create(context, R.raw.land))
-    }*/
-
 
     init {
         holder.addCallback(this)
         paint.color = Color.WHITE
     }
-/*    fun pause() {
-        pause = !pause
-    }*/
 
     fun pauseMediaPlayer() {
         if (mediaPlayer!!.isPlaying) {
@@ -156,38 +136,12 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         mediaPlayer?.start()
         mediaPlayer?.setVolume(0.5f, 0.5f)
         mediaPlayer?.isLooping = true
-
-/*        // Liberar los recursos de la melodía anterior
-        mediaPlayerList[currentLevelIndex].release()
-        // Cargar y reproducir la nueva melodía
-        mediaPlayerList[currentLevelIndex] = MediaPlayer.create(context, level.melodyId)
-        mediaPlayerList[currentLevelIndex].start()
-        mediaPlayerList[currentLevelIndex].setVolume(0.5f, 0.5f)
-        mediaPlayerList[currentLevelIndex].isLooping = true*/
-
-
         // Nueva variable para mantener la puntuación de cada nivel
         val scoreByLevel = score
         return Obstacle.createRandomObstacles(obstacleCount,speed,50f,width,height,ballSpeed,ballSpeed)
             .onEach { it.scoreByLevel = scoreByLevel }
     }
 
-/*    fun createObstaclesForLevel1(level: Level): List<Obstacle> {
-
-        //Obtener un color aleatorio de Colors.kt
-        val color = Colors.colors[Colors.random.nextInt(Colors.colors.size)]
-        val paint = Paint().apply {
-            this.color = color
-            style = Paint.Style.FILL
-        }
-
-        val obstacleList = mutableListOf<Obstacle>()
-        for (i in 0 until level.obstacleCount) {
-            obstacle = Obstacle(level.obstacleCount.toFloat(),level.ballSpeed, width.toFloat() / 4,height.toFloat() /4,level.ballSpeed,paint)
-            obstacleList.add(obstacle)
-        }
-        return obstacleList
-    }*/
 private fun createEnemiesForLevel(level: Level): List<Enemy> {
         val enemyList = mutableListOf<Enemy>()
         for (i in 0 until level.enemyCount) {
@@ -197,9 +151,6 @@ private fun createEnemiesForLevel(level: Level): List<Enemy> {
         return enemyList
     }
 
-
-
-
     override fun surfaceCreated(holder: SurfaceHolder) {
         if (width > 0 && height > 0) {
             ball = Ball(width.toFloat() / 2, height.toFloat() / 2, 50f, 10f, 10f)
@@ -208,8 +159,6 @@ private fun createEnemiesForLevel(level: Level): List<Enemy> {
             thread?.start()
         }
     }
-
-
 
     override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
     }
@@ -413,9 +362,5 @@ private fun createEnemiesForLevel(level: Level): List<Enemy> {
                 }
             }
         }
-
-/*        fun stopThread() {
-            running = false
-        }*/
     }
 }

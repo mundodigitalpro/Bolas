@@ -32,7 +32,8 @@ class MainActivity : AppCompatActivity() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             val controller = window.insetsController
             if (controller != null) {
-                controller.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                controller.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
                 controller.hide(WindowInsets.Type.systemBars())
             }
         } else {
@@ -87,7 +88,6 @@ class MainActivity : AppCompatActivity() {
                     .setPositiveButton(getString(R.string.yes)) { _, _ ->
                         finishAffinity()
                         exitProcess(0) // This will close the app and all its activities
-
                     }
                     .setNegativeButton(getString(R.string.no), null)
                     .show()
@@ -110,16 +110,14 @@ class MainActivity : AppCompatActivity() {
             }
             updateExitButtonVisibility()
         }
-
-
         gameView.onGameOver = {
             runOnUiThread {
                 updateExitButtonVisibility()
             }
         }
         updateExitButtonVisibility()
-
     }
+
     // Define the onTouchListener outside of onCreate method so it can be reused
     private val onTouchListener = View.OnTouchListener { _, event ->
         if (event.action == MotionEvent.ACTION_DOWN) {
@@ -135,6 +133,7 @@ class MainActivity : AppCompatActivity() {
         }
         true
     }
+
     private fun updateExitButtonVisibility() {
         if (gameView.getGameState() == MyGameView.GameState.GameOver || gameView.getGameState() == MyGameView.GameState.Paused) {
             exitButton.visibility = View.VISIBLE
@@ -145,17 +144,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onPause() {
         super.onPause()
-        //saveGameState()
         if (gameView.getGameState() == MyGameView.GameState.Playing) {
             gameView.pauseMediaPlayer()
         }
-
-
     }
 
     override fun onResume() {
         super.onResume()
-        //loadGameState() // Recupera el estado del juego de las preferencias compartidas y lo restaura
         if (gameView.getGameState() == MyGameView.GameState.Playing) {
             gameView.resumeMediaPlayer()
         }
@@ -163,11 +158,8 @@ class MainActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
-       //saveGameState()
-        gameView.pauseMediaPlayer() // Pausa el MediaPlayer si no lo has hecho en onPause()
-        gameView.releaseMediaPlayer() // Libera los recursos del MediaPlayer
+        gameView.pauseMediaPlayer()
+        gameView.releaseMediaPlayer()
     }
-
-
 }
 

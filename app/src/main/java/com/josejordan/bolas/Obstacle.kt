@@ -14,7 +14,7 @@ class Obstacle(
     val radius: Float,
     var xVelocity: Float,
     var yVelocity: Float,
-    val paint: Paint,
+    private val paint: Paint,
     var scoreByLevel: Int = 0
 
 ) {
@@ -38,9 +38,6 @@ class Obstacle(
             Color.YELLOW,
             Color.CYAN,
             Color.MAGENTA,
-            Color.DKGRAY,
-            Color.LTGRAY,
-            Color.GRAY
         )
 
         fun createRandomObstacles(
@@ -97,13 +94,9 @@ class Obstacle(
                     )
                 )
             }
-
             return obstacles
         }
     }
-
-
-
 }
 
 
