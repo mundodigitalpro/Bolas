@@ -2,7 +2,6 @@ package com.josejordan.mygame
 
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
@@ -22,7 +21,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var gameView: MyGameView
     private lateinit var exitButton: Button
     private lateinit var pauseButton: ImageButton
-    private lateinit var pauseButtonIcon: Drawable
     private var isPaused = false
     lateinit var highScoreTextView: TextView
 
@@ -48,13 +46,11 @@ class MainActivity : AppCompatActivity() {
 
         gameView = findViewById(R.id.my_game_view)
         gameView.requestFocus()
-
         exitButton = findViewById(R.id.exitButton)
         pauseButton = findViewById(R.id.pauseButton)
-        pauseButtonIcon = pauseButton.background
         highScoreTextView = findViewById(R.id.highScoreTextView)
 
-        val prefs = getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
+        val prefs = getSharedPreferences(MY_GAME_PREFS, Context.MODE_PRIVATE)
         if (prefs.contains(HIGH_SCORE_KEY)) {
             val highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
             highScoreTextView.text = getString(R.string.high_score, highScore)
@@ -86,33 +82,35 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 AlertDialog.Builder(this@MainActivity)
-                    .setTitle("Exit")
-                    .setMessage("Are you sure you want to exit?")
-                    .setPositiveButton("Yes") { _, _ ->
+                    .setTitle(getString(R.string.exit_dialog))
+                    .setMessage(getString(R.string.sure))
+                    .setPositiveButton(getString(R.string.yes)) { _, _ ->
                         finishAffinity()
                         exitProcess(0) // This will close the app and all its activities
 
                     }
-                    .setNegativeButton("No", null)
+                    .setNegativeButton(getString(R.string.no), null)
                     .show()
             }
         })
 
-
         pauseButton.setOnClickListener {
             if (gameView.getGameState() == MyGameView.GameState.Playing) {
-                gameView.setGameState(MyGameView.GameState.Paused)
-                gameView.pauseMediaPlayer()
-                gameView.setOnTouchListener(null) // Remove the onTouchListener when game is paused
-                pauseButton.setImageResource(R.drawable.ic_play)
+                gameView.setGameState(MyGameView.GameState.Paused).also {
+                    gameView.pauseMediaPlayer()
+                    gameView.setOnTouchListener(null) // Remove the onTouchListener when game is paused
+                    pauseButton.setImageResource(R.drawable.ic_play)
+                }
             } else if (gameView.getGameState() == MyGameView.GameState.Paused) {
-                gameView.setGameState(MyGameView.GameState.Playing)
-                gameView.resumeMediaPlayer()
-                gameView.setOnTouchListener(onTouchListener) // Set the onTouchListener back when game is resumed
-                pauseButton.setImageResource(R.drawable.ic_pause)
+                gameView.setGameState(MyGameView.GameState.Playing).also {
+                    gameView.resumeMediaPlayer()
+                    gameView.setOnTouchListener(onTouchListener) // Set the onTouchListener back when game is resumed
+                    pauseButton.setImageResource(R.drawable.ic_pause)
+                }
             }
             updateExitButtonVisibility()
         }
+
 
         gameView.onGameOver = {
             runOnUiThread {
@@ -144,5 +142,32 @@ class MainActivity : AppCompatActivity() {
             exitButton.visibility = View.GONE
         }
     }
+
+    override fun onPause() {
+        super.onPause()
+        //saveGameState()
+        if (gameView.getGameState() == MyGameView.GameState.Playing) {
+            gameView.pauseMediaPlayer()
+        }
+
+
+    }
+
+    override fun onResume() {
+        super.onResume()
+        //loadGameState() // Recupera el estado del juego de las preferencias compartidas y lo restaura
+        if (gameView.getGameState() == MyGameView.GameState.Playing) {
+            gameView.resumeMediaPlayer()
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+       //saveGameState()
+        gameView.pauseMediaPlayer() // Pausa el MediaPlayer si no lo has hecho en onPause()
+        gameView.releaseMediaPlayer() // Libera los recursos del MediaPlayer
+    }
+
+
 }
 

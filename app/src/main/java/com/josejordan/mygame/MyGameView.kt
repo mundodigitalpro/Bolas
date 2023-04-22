@@ -29,6 +29,14 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private var gameOverTouched = false
     private val levels = listOf(
         Level(3f, 3, R.raw.space,0),
+        Level(4f, 5, R.raw.space,0),
+        Level(5f, 8, R.raw.space,0),
+        Level(6f, 12, R.raw.space,0),
+        Level(7f, 15, R.raw.space,0),
+        Level(8f, 20, R.raw.space,0),
+        Level(9f, 25, R.raw.space,0),
+        Level(10f,30, R.raw.space,0),
+        Level(10f,35, R.raw.space,0),
         Level(5f, 5, R.raw.ware,1),
         Level(6f, 6, R.raw.robot,2),
         Level(7f, 7, R.raw.retro,3),
@@ -60,6 +68,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private var lives = 3
     var onGameOver: (() -> Unit)? = null
     var onGameRestart: (() -> Unit)? = null
+
     private val pop = MediaPlayer.create(context, R.raw.pop)
     private val space = MediaPlayer.create(context, R.raw.space)
     private val ware = MediaPlayer.create(context, R.raw.ware)
@@ -67,10 +76,20 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private val error = MediaPlayer.create(context, R.raw.error)
     private val retro = MediaPlayer.create(context, R.raw.retro)
     private val land = MediaPlayer.create(context, R.raw.land)
-
     private var mediaPlayer: MediaPlayer? = null
     private var pause = false
     private var mediaPlayerCurrentPosition: Int = 0
+
+    private val mediaPlayerList = mutableListOf<MediaPlayer>().apply {
+        add(MediaPlayer.create(context, R.raw.pop))
+        add(MediaPlayer.create(context, R.raw.space))
+        add(MediaPlayer.create(context, R.raw.ware))
+        add(MediaPlayer.create(context, R.raw.robot))
+        add(MediaPlayer.create(context, R.raw.error))
+        add(MediaPlayer.create(context, R.raw.retro))
+        add(MediaPlayer.create(context, R.raw.land))
+    }
+
 
     init {
         holder.addCallback(this)
@@ -92,10 +111,13 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         mediaPlayer!!.start()
     }
 
-    private fun updateHighScore() {
-        val prefs = context.getSharedPreferences("MyGamePrefs", Context.MODE_PRIVATE)
-        val highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
+    fun releaseMediaPlayer() {
+        mediaPlayer!!.release()
+    }
 
+    private fun updateHighScore() {
+        val prefs = context.getSharedPreferences(MY_GAME_PREFS, Context.MODE_PRIVATE)
+        val highScore = prefs.getInt(HIGH_SCORE_KEY, 0)
         if (score > highScore) {
             with(prefs.edit()) {
                 putInt(HIGH_SCORE_KEY, score)
@@ -136,6 +158,15 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         mediaPlayer?.start()
         mediaPlayer?.setVolume(0.5f, 0.5f)
         mediaPlayer?.isLooping = true
+
+/*        // Liberar los recursos de la melodía anterior
+        mediaPlayerList[currentLevelIndex].release()
+        // Cargar y reproducir la nueva melodía
+        mediaPlayerList[currentLevelIndex] = MediaPlayer.create(context, level.melodyId)
+        mediaPlayerList[currentLevelIndex].start()
+        mediaPlayerList[currentLevelIndex].setVolume(0.5f, 0.5f)
+        mediaPlayerList[currentLevelIndex].isLooping = true*/
+
 
         // Nueva variable para mantener la puntuación de cada nivel
         val scoreByLevel = score
