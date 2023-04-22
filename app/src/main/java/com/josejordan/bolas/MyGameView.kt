@@ -40,7 +40,7 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
         Level(10f, 8, R.raw.land,4),
         Level(10f, 12, R.raw.land,4)
     )
-    private var currentLevelIndex = 0 // nivel actual
+    private var currentLevelIndex = -1 // nivel actual
     private var gameState: GameState = GameState.Waiting
 
     enum class GameState {
@@ -214,7 +214,7 @@ private fun createEnemiesForLevel(level: Level): List<Enemy> {
             canvas?.drawText(
                 gameOverText,
                 (width - playAgainWidth) / 2,
-                height / 2f,
+                height / 2f-80,
                 playAndGameOverPaint
             )
         } else if (gameState == GameState.Waiting) {
@@ -223,7 +223,7 @@ private fun createEnemiesForLevel(level: Level): List<Enemy> {
             canvas?.drawText(
                 playText,
                 (width - playWidth) / 2,
-                height / 2f,
+                height / 2f-80,
                 playAndGameOverPaint
             )
         }
