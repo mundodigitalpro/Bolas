@@ -24,21 +24,21 @@ class MyGameView(context: Context, attrs: AttributeSet) : SurfaceView(context, a
     private var currentLevel = Level(0F, 0, 0,0)
     private var gameOverTouched = false
     private val levels = listOf(
-        Level(3f, 5, R.raw.space,0),
-        Level(4f, 8, R.raw.space,0),
-        Level(5f, 12, R.raw.space,0),
-        Level(6f, 5, R.raw.ware,1),
-        Level(7f, 8, R.raw.ware,1),
-        Level(8f, 12, R.raw.ware,1),
-        Level(9f, 5, R.raw.robot,2),
-        Level(10f,8, R.raw.robot,2),
-        Level(10f,12, R.raw.robot,2),
-        Level(10f, 5, R.raw.retro,3),
-        Level(10f, 8, R.raw.retro,3),
-        Level(10f, 12, R.raw.retro,3),
-        Level(10f, 5, R.raw.land,4),
-        Level(10f, 8, R.raw.land,4),
-        Level(10f, 12, R.raw.land,4)
+        Level(3f, 10, R.raw.space,0),
+        Level(4f, 20, R.raw.space,0),
+        Level(5f, 30, R.raw.space,0),
+        Level(6f, 10, R.raw.ware,1),
+        Level(7f, 20, R.raw.ware,1),
+        Level(8f, 30, R.raw.ware,1),
+        Level(9f, 10, R.raw.robot,2),
+        Level(10f,20, R.raw.robot,2),
+        Level(10f,30, R.raw.robot,2),
+        Level(10f, 10, R.raw.retro,3),
+        Level(10f, 20, R.raw.retro,3),
+        Level(10f, 30, R.raw.retro,3),
+        Level(10f, 10, R.raw.land,4),
+        Level(10f, 20, R.raw.land,4),
+        Level(10f, 30, R.raw.land,4)
     )
     private var currentLevelIndex = -1 // nivel actual
     private var gameState: GameState = GameState.Waiting
