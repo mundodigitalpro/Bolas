@@ -7,5 +7,7 @@
     <string name="sure">Are you sure you want to exit?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="game_screen">Game Screen</string>
+    <string name="pause_button">Pause Button</string>
 
 </resources>

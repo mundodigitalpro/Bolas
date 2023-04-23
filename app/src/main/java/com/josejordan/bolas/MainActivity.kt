@@ -2,6 +2,7 @@ package com.josejordan.bolas
 
 import android.app.AlertDialog
 import android.content.Context
+import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
@@ -80,7 +81,8 @@ class MainActivity : AppCompatActivity() {
             onBackPressedDispatcher.onBackPressed()
         }
 
-        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+
+/*        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle(getString(R.string.exit_dialog))
@@ -92,7 +94,30 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton(getString(R.string.no), null)
                     .show()
             }
+        })*/
+
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                val builder = AlertDialog.Builder(this@MainActivity)
+                    .setTitle(getString(R.string.exit_dialog))
+                    .setMessage(getString(R.string.sure))
+                    .setPositiveButton(getString(R.string.yes)) { _, _ ->
+                        finishAffinity()
+                        exitProcess(0) // This will close the app and all its activities
+                    }
+                    .setNegativeButton(getString(R.string.no), null)
+
+                val alertDialog = builder.create()
+                alertDialog.show()
+
+                // Set the color of the "yes" button text to black
+                alertDialog.getButton(AlertDialog.BUTTON_POSITIVE).setTextColor(Color.BLACK)
+
+                // Set the color of the "no" button text to black
+                alertDialog.getButton(AlertDialog.BUTTON_NEGATIVE).setTextColor(Color.BLACK)
+            }
         })
+
 
         pauseButton.setOnClickListener {
             if (gameView.getGameState() == MyGameView.GameState.Playing) {

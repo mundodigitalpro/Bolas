@@ -6,6 +6,7 @@
 
     <com.josejordan.bolas.MyGameView
         android:id="@+id/my_game_view"
+        android:contentDescription="@string/game_screen"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:background="@color/black"
@@ -20,6 +21,7 @@
 
     <android.widget.ImageButton
         android:id="@+id/pauseButton"
+        android:contentDescription="@string/pause_button"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="100dp"
