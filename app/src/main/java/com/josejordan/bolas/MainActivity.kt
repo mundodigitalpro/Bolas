@@ -2,7 +2,6 @@ package com.josejordan.bolas
 
 import android.app.AlertDialog
 import android.content.Context
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.MotionEvent
@@ -82,7 +81,7 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-/*        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
+        onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 AlertDialog.Builder(this@MainActivity)
                     .setTitle(getString(R.string.exit_dialog))
@@ -94,8 +93,9 @@ class MainActivity : AppCompatActivity() {
                     .setNegativeButton(getString(R.string.no), null)
                     .show()
             }
-        })*/
+        })
 
+/*
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 val builder = AlertDialog.Builder(this@MainActivity)
@@ -118,6 +118,7 @@ class MainActivity : AppCompatActivity() {
             }
         })
 
+*/
 
         pauseButton.setOnClickListener {
             if (gameView.getGameState() == MyGameView.GameState.Playing) {
