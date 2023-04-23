@@ -4,7 +4,7 @@ Bolas es un juego de habilidad y estrategia para Android, en el que los jugadore
 
 ![Bolas Screenshot 1](screenshot1.png)
 ![Bolas Screenshot 2](screenshot2.png)
-![Bolas Screenshot 3](screenshot3.png
+![Bolas Screenshot 3](screenshot3.png)
 
 ## Características
 
