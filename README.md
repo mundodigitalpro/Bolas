@@ -5,8 +5,7 @@ Bolas es un juego de habilidad y estrategia para Android, en el que los jugadore
 
 ## Bolas - Video
 ----------------
-
-[![Bolas Video](https://img.youtube.com/vi/MCEeriZMRNw/0.jpg)]([https://www.youtube.com/shorts/MCEeriZMRNw](https://www.youtube.com/shorts/MCEeriZMRNw) "Bolas Video")
+[![Bolas Video](https://img.youtube.com/vi/MCEeriZMRNw/0.jpg)](https://www.youtube.com/shorts/MCEeriZMRNw "Bolas Video")
 
 ## Bolas - Imagenes
 -------------------
